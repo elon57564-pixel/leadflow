@@ -13,6 +13,7 @@ import { authenticateToken } from './server/middlewares/auth';
 
 // Modular Route Handlers
 import authRoutes from './server/routes/authRoutes';
+import tenantRouter from './server/routes/tenantRoutes';
 import { projectRouter, portalRouter, leadScoreRouter } from './server/routes/projectRoutes';
 import chatRouter from './server/routes/chatRoutes';
 import { fileRouter, gdprRouter } from './server/routes/fileRoutes';
@@ -45,6 +46,7 @@ app.use(authenticateToken);
 
 // Authentication & Users
 app.use('/api/auth', authRoutes);
+app.use('/api/tenants', tenantRouter);
 
 // Projects, SOP Transfer Gate, Collaborators, & Leads Scoring
 app.use('/api/projects', projectRouter);

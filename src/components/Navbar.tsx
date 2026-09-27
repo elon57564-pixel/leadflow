@@ -113,10 +113,14 @@ export const Navbar: React.FC = () => {
     sales: 'Sales Representative',
     coordinator: 'Project Coordinator',
     developer: 'Full-Stack Developer',
+    designer: 'UI/UX Designer',
     admin: 'Agency Executive (Admin)',
+    ceo: 'Chief Executive Officer (CEO)',
+    project_manager: 'Project Manager (PM)',
     bd_head: 'Head of BD (Inbound Automation)',
     collaborator: 'Institutional Evaluation Partner',
-    client_guest: 'Client Portal (Guest)'
+    client_guest: 'Client Portal (Guest)',
+    team_member: 'Team Member'
   };
 
   const isSecondaryActive = secondaryTools.some(tool => tool.id === activeTab);

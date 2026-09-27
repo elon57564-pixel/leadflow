@@ -702,6 +702,45 @@ export const UnifiedInboxView: React.FC = () => {
                   </div>
                 )}
 
+                {/* Direct CRM & Follow-Up Actions */}
+                <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 flex-wrap text-xs">
+                  <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 text-[11px] font-medium">
+                    <span>Direct CRM Actions:</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        showToast(`CRM Status for ${selectedMessage.clientName} updated to "Scoped"`, 'success');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-indigo-600 text-[11px] font-bold transition cursor-pointer"
+                    >
+                      Move to Scoped
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        showToast(`50% Advance invoice triggered for ${selectedMessage.clientName}`, 'success');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 text-[11px] font-bold transition cursor-pointer"
+                    >
+                      Trigger 50% Advance
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        showToast(`Automated Stage 2 follow-up scheduled for ${selectedMessage.clientName}`, 'info');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 text-[11px] font-bold transition cursor-pointer"
+                    >
+                      Schedule Drip Nudge
+                    </button>
+                  </div>
+                </div>
+
                 {/* Reply Editor */}
                 <textarea
                   id="inbox-reply-textarea"

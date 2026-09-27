@@ -2,7 +2,135 @@
  * Core Type Definitions for International Client Handling & Project Operations Suite
  */
 
-export type UserRole = 'admin' | 'sales' | 'coordinator' | 'developer' | 'client_guest' | 'collaborator' | 'bd_head';
+export type UserRole = 
+  | 'admin' 
+  | 'sales' 
+  | 'coordinator' 
+  | 'developer' 
+  | 'client_guest' 
+  | 'collaborator' 
+  | 'bd_head'
+  | 'ceo'
+  | 'project_manager'
+  | 'designer'
+  | 'team_member';
+
+export interface TenantBranding {
+  primaryColor: string; // hex
+  accentColor: string;
+  theme: 'dark' | 'light' | 'system';
+  geometricStyle: 'minimal_grid' | 'cyber_glass' | 'monochrome_clean' | 'matrix_dark';
+  logoPreset?: string;
+}
+
+export interface TenantBusinessInfo {
+  industry: string;
+  description: string;
+  website?: string;
+  targetRevenueUSD?: number;
+  coreObjectives: string[];
+}
+
+export interface TenantIntegrations {
+  linkedIn: {
+    connected: boolean;
+    accountHandle?: string;
+    organizationName?: string;
+    syncIntervalMinutes: number;
+    autoOutreachEnabled: boolean;
+    lastSync?: string;
+    messagesSyncedCount?: number;
+  };
+  gmail: {
+    connected: boolean;
+    accountEmail?: string;
+    threadTracking: boolean;
+    autoDraftReplies: boolean;
+    lastSync?: string;
+    emailsSyncedCount?: number;
+  };
+  stripe: {
+    connected: boolean;
+    liveMode: boolean;
+    publishableKeyMasked?: string;
+    currency: string;
+    lastSync?: string;
+    mrrUSD?: number;
+  };
+}
+
+export interface TenantRoleConfig {
+  role: UserRole;
+  title: string;
+  permissions: string[];
+  department: 'executive' | 'sales' | 'operations' | 'engineering' | 'design' | 'client';
+  dashboardLayout: 'executive_macro' | 'sales_outreach' | 'pm_sprint' | 'dev_tasks' | 'design_assets' | 'client_portal';
+}
+
+export interface Tenant {
+  id: string; // e.g. "tenant-alm-nexus"
+  name: string; // "ALM Nexus Enterprise"
+  slug: string;
+  logoUrl: string;
+  branding: TenantBranding;
+  businessInfo: TenantBusinessInfo;
+  integrations: TenantIntegrations;
+  rolesConfig: Record<string, TenantRoleConfig>;
+  activeMembersCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DepartmentalProgress {
+  department: 'sales_bd' | 'project_management' | 'engineering_dev' | 'ui_ux_design';
+  name: string;
+  leadName: string;
+  leadAvatar?: string;
+  healthStatus: 'optimal' | 'on_track' | 'needs_attention';
+  metrics: {
+    primaryMetricLabel: string;
+    primaryMetricValue: string | number;
+    velocityScore: number; // 0-100%
+    activeTasksCount: number;
+    completedThisWeekCount: number;
+    slaAdherencePercent: number;
+  };
+  highlights: string[];
+  activeMilestones: Array<{
+    title: string;
+    owner: string;
+    status: 'in_progress' | 'review' | 'blocked' | 'completed';
+    dueDate: string;
+    progressPercent: number;
+  }>;
+}
+
+export interface ActivityFeedItem {
+  id: string;
+  tenantId?: string;
+  type: 'lead_scraped' | 'message_received' | 'payment_captured' | 'staging_deployed' | 'task_completed' | 'system_alert' | 'review_signed';
+  title: string;
+  description: string;
+  actorName: string;
+  actorRole?: string;
+  actorAvatar?: string;
+  sourceChannel?: string;
+  timestamp: string;
+  actionUrl?: string;
+  isRead?: boolean;
+}
+
+export interface WikiDocument {
+  id: string;
+  tenantId?: string;
+  title: string;
+  category: 'outreach_scripts' | 'email_templates' | 'brand_guidelines' | 'sop_checklists' | 'tech_architecture';
+  description: string;
+  content: string;
+  author: string;
+  updatedAt: string;
+  tags: string[];
+}
 
 export interface User {
   id: string;

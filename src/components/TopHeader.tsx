@@ -10,11 +10,16 @@ import {
   Sparkles,
   ChevronDown,
   Sun,
-  Moon
+  Moon,
+  Bell,
+  BookOpen,
+  Activity,
+  Layers
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { SupportedCurrency, UserRole } from '../types';
 import { ThemeToggle } from './ThemeToggle';
+import { TenantSwitcher } from './TenantSwitcher';
 
 interface TopHeaderProps {
   onOpenMobileSidebar: () => void;
@@ -33,11 +38,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
     databaseStatus,
     isDark,
     setIsDark,
-    showToast
+    showToast,
+    unreadActivityCount,
+    setIsActivityFeedOpen,
+    setIsWikiModalOpen,
+    setIsPlatformHealthModalOpen
   } = useApp();
 
   const tabTitles: Record<string, { title: string; subtitle: string }> = {
     pipeline: { title: 'Pipeline & Lead Deals', subtitle: 'Step 1–5: Discovery, Pricing, 50% Advance & Staging' },
+    departmental: { title: 'Departmental Progress & Velocity', subtitle: 'Cross-functional tracking for Sales, PM, Engineering & Design' },
     inbox: { title: 'Unified Omni-Inbox', subtitle: 'Centralized client conversations across LinkedIn, Upwork & Email' },
     outreach: { title: 'AI Cold Outreach Engine', subtitle: 'Lead scraper, automated follow-ups & connection templates' },
     sop: { title: 'International Client SOP Rules', subtitle: '11-Step Quality Gate, Commission Rules & Milestone Protections' },
@@ -54,7 +64,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
 
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-slate-200 dark:border-white/[0.08] bg-white/90 dark:bg-[#070a12]/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-      {/* Left: Mobile Toggle & Page Title */}
+      {/* Left: Mobile Toggle & Page Title & Tenant Switcher */}
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileSidebar}
@@ -63,6 +73,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         >
           <Menu className="w-5 h-5" />
         </button>
+
+        <div className="hidden sm:block">
+          <TenantSwitcher compact={true} />
+        </div>
 
         <div>
           <h1 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
@@ -77,6 +91,39 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
       {/* Right: Quick Context Badges */}
       <div className="flex items-center gap-2 sm:gap-2.5">
         
+        {/* Global Wiki Button */}
+        <button
+          onClick={() => setIsWikiModalOpen(true)}
+          className="p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer"
+          title="Company Wiki & Knowledge Base"
+        >
+          <BookOpen className="w-4 h-4" />
+        </button>
+
+        {/* Real-Time Activity Feed Bell */}
+        <button
+          onClick={() => setIsActivityFeedOpen(true)}
+          className="relative p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer"
+          title="Activity Feed & Live Stream"
+        >
+          <Bell className="w-4 h-4" />
+          {unreadActivityCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-mono font-bold flex items-center justify-center animate-pulse">
+              {unreadActivityCount}
+            </span>
+          )}
+        </button>
+
+        {/* Platform Health Monitor */}
+        <button
+          onClick={() => setIsPlatformHealthModalOpen(true)}
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold hover:bg-emerald-500/20 transition cursor-pointer"
+          title="External APIs Health Monitor"
+        >
+          <Activity className="w-3.5 h-3.5" />
+          <span>Health OK</span>
+        </button>
+
         {/* Professional Real Light / Dark / System Mode Switcher */}
         <ThemeToggle variant="compact" />
 
@@ -94,12 +141,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
             <option value="AUD">AUD (A$)</option>
             <option value="AED">AED (AED)</option>
           </select>
-        </div>
-
-        {/* SOP Quality Status */}
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold">
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>SOP 17/17</span>
         </div>
 
         {/* Firebase / Google Auth Quick Badge */}

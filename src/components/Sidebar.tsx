@@ -43,6 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
     setActiveTab,
     role,
     currentUser,
+    currentTenant,
     unreadInboxCount,
     automatedTestsPassedCount,
     isDark,
@@ -50,6 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
     logout,
     setIsAuthModalOpen,
     setIsNewLeadModalOpen,
+    setIsOnboardingModalOpen,
     openAIModal,
     setIsTestModalOpen,
     setIsDatabaseModalOpen,
@@ -58,28 +60,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
 
   const roleLabels: Record<UserRole, { title: string; badgeClass: string }> = {
     admin: { title: 'Executive (Admin)', badgeClass: 'bg-rose-500/20 text-rose-600 dark:text-rose-300 border-rose-500/30' },
+    ceo: { title: 'Chief Executive (CEO)', badgeClass: 'bg-rose-500/20 text-rose-600 dark:text-rose-300 border-rose-500/30' },
     sales: { title: 'Sales Specialist', badgeClass: 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/30' },
     coordinator: { title: 'Project Coordinator', badgeClass: 'bg-blue-500/20 text-blue-600 dark:text-blue-300 border-blue-500/30' },
+    project_manager: { title: 'Project Manager', badgeClass: 'bg-blue-500/20 text-blue-600 dark:text-blue-300 border-blue-500/30' },
     developer: { title: 'Lead Developer', badgeClass: 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border-indigo-500/30' },
+    designer: { title: 'UI/UX Designer', badgeClass: 'bg-purple-500/20 text-purple-600 dark:text-purple-300 border-purple-500/30' },
     bd_head: { title: 'Head of BD', badgeClass: 'bg-purple-500/20 text-purple-600 dark:text-purple-300 border-purple-500/30' },
     collaborator: { title: 'Evaluation Partner', badgeClass: 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 border-cyan-500/30' },
-    client_guest: { title: 'Client Guest', badgeClass: 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border-amber-500/30' }
+    client_guest: { title: 'Client Stakeholder', badgeClass: 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border-amber-500/30' },
+    team_member: { title: 'Team Member', badgeClass: 'bg-slate-500/20 text-slate-600 dark:text-slate-300 border-slate-500/30' }
   };
 
   // Role-based navigation matrix
   const navItems = [
-    { id: 'pipeline', label: 'Pipeline & Deals', icon: Kanban, roles: ['admin', 'bd_head', 'sales', 'coordinator', 'developer', 'collaborator'] },
-    { id: 'gmail', label: 'Gmail Workspace', icon: Mail, roles: ['admin', 'bd_head', 'sales', 'coordinator', 'developer'] },
-    { id: 'inbox', label: 'Unified Inbox', icon: Inbox, badge: unreadInboxCount, roles: ['admin', 'bd_head', 'sales', 'coordinator'] },
-    { id: 'outreach', label: 'Outreach Engine', icon: Send, roles: ['admin', 'bd_head', 'sales'] },
-    { id: 'sop', label: 'SOP 1–11 Rules', icon: BookOpen, badge: `${automatedTestsPassedCount}/17`, roles: ['admin', 'bd_head', 'coordinator', 'developer'] },
-    { id: 'analytics', label: 'Analytics & Revenue', icon: BarChart3, roles: ['admin', 'bd_head'] },
-    { id: 'free_apis', label: 'Live Free APIs', icon: Globe2, badge: 'Forex & DNS', roles: ['admin', 'bd_head', 'sales', 'coordinator', 'developer'] },
-    { id: 'commissions', label: 'Commissions & Splits', icon: Coins, roles: ['admin', 'bd_head', 'sales'] },
-    { id: 'chat', label: 'Team Chat', icon: MessageSquare, roles: ['admin', 'bd_head', 'sales', 'coordinator', 'developer', 'collaborator'] },
-    { id: 'vault', label: 'Secure File Vault', icon: FolderLock, roles: ['admin', 'bd_head', 'coordinator', 'developer'] },
-    { id: 'integrations', label: 'Integrations & Hooks', icon: Globe, roles: ['admin', 'bd_head'] },
-    { id: 'portal', label: 'Client Portal', icon: ExternalLink, roles: ['admin', 'bd_head', 'client_guest', 'collaborator'] }
+    { id: 'pipeline', label: 'Pipeline & Deals', icon: Kanban, roles: ['admin', 'ceo', 'bd_head', 'sales', 'coordinator', 'project_manager', 'developer', 'designer', 'collaborator'] },
+    { id: 'departmental', label: 'Department Velocity', icon: Layers, roles: ['admin', 'ceo', 'bd_head', 'coordinator', 'project_manager', 'sales', 'developer', 'designer'] },
+    { id: 'gmail', label: 'Gmail Workspace', icon: Mail, roles: ['admin', 'ceo', 'bd_head', 'sales', 'coordinator', 'project_manager', 'developer'] },
+    { id: 'inbox', label: 'Unified Inbox', icon: Inbox, badge: unreadInboxCount, roles: ['admin', 'ceo', 'bd_head', 'sales', 'coordinator', 'project_manager'] },
+    { id: 'outreach', label: 'Outreach Engine', icon: Send, roles: ['admin', 'ceo', 'bd_head', 'sales'] },
+    { id: 'sop', label: 'SOP 1–11 Rules', icon: BookOpen, badge: `${automatedTestsPassedCount}/17`, roles: ['admin', 'ceo', 'bd_head', 'coordinator', 'project_manager', 'developer'] },
+    { id: 'analytics', label: 'Analytics & Revenue', icon: BarChart3, roles: ['admin', 'ceo', 'bd_head'] },
+    { id: 'free_apis', label: 'Live Free APIs', icon: Globe2, badge: 'Forex & DNS', roles: ['admin', 'ceo', 'bd_head', 'sales', 'coordinator', 'project_manager', 'developer', 'designer'] },
+    { id: 'commissions', label: 'Commissions & Splits', icon: Coins, roles: ['admin', 'ceo', 'bd_head', 'sales'] },
+    { id: 'chat', label: 'Team Chat', icon: MessageSquare, roles: ['admin', 'ceo', 'bd_head', 'sales', 'coordinator', 'project_manager', 'developer', 'designer', 'collaborator'] },
+    { id: 'vault', label: 'Secure File Vault', icon: FolderLock, roles: ['admin', 'ceo', 'bd_head', 'coordinator', 'project_manager', 'developer', 'designer'] },
+    { id: 'integrations', label: 'Integrations & Hooks', icon: Globe, roles: ['admin', 'ceo', 'bd_head'] },
+    { id: 'portal', label: 'Client Portal', icon: ExternalLink, roles: ['admin', 'ceo', 'bd_head', 'client_guest', 'team_member', 'collaborator'] }
   ];
 
   const currentRoleInfo = roleLabels[role] || roleLabels.admin;
@@ -114,19 +121,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
               onClick={() => handleNavClick('pipeline')}
             >
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-indigo-700 p-0.5 shadow-md shadow-indigo-600/25 flex items-center justify-center">
-                <img src="/icon.svg" alt="AgencyOps" className="w-7 h-7 rounded-lg" />
+                <img src="/icon.svg" alt="ALM Nexus" className="w-7 h-7 rounded-lg" />
               </div>
-              <div>
+              <div className="truncate max-w-[170px]">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
-                    AgencyOps
+                  <span className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white truncate">
+                    {currentTenant?.name || 'ALM Nexus'}
                   </span>
-                  <span className="text-[10px] font-bold uppercase px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-mono">
-                    PRO
+                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-mono shrink-0">
+                    SaaS
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block -mt-0.5">
-                  Operations &amp; Client Suite
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block -mt-0.5 truncate">
+                  Enterprise Operations Hub
                 </span>
               </div>
             </div>

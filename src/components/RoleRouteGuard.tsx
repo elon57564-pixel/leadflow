@@ -16,7 +16,7 @@ export const RoleRouteGuard: React.FC<RoleRouteGuardProps> = ({
 }) => {
   const { role, setActiveTab } = useApp();
 
-  const isAllowed = role === 'admin' || role === 'bd_head' || allowedRoles.includes(role);
+  const isAllowed = role === 'admin' || role === 'ceo' || role === 'bd_head' || allowedRoles.includes(role);
 
   if (!isAllowed) {
     const fallbackTab = role === 'client_guest' ? 'portal' : 'pipeline';

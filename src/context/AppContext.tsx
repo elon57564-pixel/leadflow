@@ -1,5 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ProjectLead, UserRole, SupportedLanguage, AutomatedTestResult, SupportedCurrency, AgencyScaleMode, AISettings, AuthUser, DatabaseEngineStatus, ThemeMode } from '../types';
+import { 
+  ProjectLead, 
+  UserRole, 
+  SupportedLanguage, 
+  AutomatedTestResult, 
+  SupportedCurrency, 
+  AgencyScaleMode, 
+  AISettings, 
+  AuthUser, 
+  DatabaseEngineStatus, 
+  ThemeMode,
+  Tenant,
+  ActivityFeedItem,
+  WikiDocument,
+  DepartmentalProgress
+} from '../types';
 import { TRANSLATIONS } from '../data/translations';
 import { getSavedAISettings, saveAISettings } from '../services/aiService';
 import { ToastItem, ToastType } from '../components/ToastNotification';
@@ -20,6 +35,8 @@ import { offlineSyncService } from '../services/offlineSyncService';
 import { googleSheetsService } from '../services/googleSheetsService';
 import { localDatabase } from '../services/localDatabaseFallback';
 
+export type AppNavTab = 'sop' | 'pipeline' | 'outreach' | 'inbox' | 'analytics' | 'integrations' | 'commissions' | 'chat' | 'vault' | 'portal' | 'free_apis' | 'gmail' | 'departmental' | 'wiki';
+
 interface AppContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;
@@ -34,6 +51,32 @@ interface AppContextType {
   switchPersona: (role: UserRole) => Promise<void>;
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;
+  // Multi-Tenant Architecture & Onboarding
+  currentTenant: Tenant | null;
+  tenants: Tenant[];
+  switchTenant: (tenantId: string) => Promise<void>;
+  refreshTenants: () => Promise<void>;
+  isOnboardingModalOpen: boolean;
+  setIsOnboardingModalOpen: (open: boolean) => void;
+  onboardNewTenant: (data: any) => Promise<{ success: boolean; message?: string; tenant?: Tenant }>;
+  // Real-time Activity Feed & System Alerts
+  isActivityFeedOpen: boolean;
+  setIsActivityFeedOpen: (open: boolean) => void;
+  activityFeed: ActivityFeedItem[];
+  unreadActivityCount: number;
+  markActivityAsRead: (id?: string) => void;
+  refreshActivityFeed: () => Promise<void>;
+  // Global Company Wiki / Knowledge Base
+  isWikiModalOpen: boolean;
+  setIsWikiModalOpen: (open: boolean) => void;
+  wikiDocs: WikiDocument[];
+  refreshWikiDocs: () => Promise<void>;
+  // Departmental Progress & Real-Time Tracking
+  departmentalProgress: DepartmentalProgress[];
+  refreshDepartmentalProgress: () => Promise<void>;
+  // Platform Health Monitor
+  isPlatformHealthModalOpen: boolean;
+  setIsPlatformHealthModalOpen: (open: boolean) => void;
   databaseStatus: DatabaseEngineStatus | null;
   refreshDatabaseStatus: () => Promise<void>;
   isDatabaseModalOpen: boolean;
@@ -46,8 +89,8 @@ interface AppContextType {
   isDark: boolean;
   setIsDark: (dark: boolean) => void;
   toggleTheme: () => void;
-  activeTab: 'sop' | 'pipeline' | 'outreach' | 'inbox' | 'analytics' | 'integrations' | 'commissions' | 'chat' | 'vault' | 'portal' | 'free_apis' | 'gmail';
-  setActiveTab: (tab: 'sop' | 'pipeline' | 'outreach' | 'inbox' | 'analytics' | 'integrations' | 'commissions' | 'chat' | 'vault' | 'portal' | 'free_apis' | 'gmail') => void;
+  activeTab: AppNavTab;
+  setActiveTab: (tab: AppNavTab) => void;
   activePortalProjectId: string | null;
   setActivePortalProjectId: (id: string | null) => void;
   openClientPortal: (projectId: string) => void;
@@ -210,19 +253,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setThemeModeState(isDark ? 'light' : 'dark');
   };
 
-  const [activeTab, setActiveTabState] = useState<'sop' | 'pipeline' | 'outreach' | 'inbox' | 'analytics' | 'integrations' | 'commissions' | 'chat' | 'vault' | 'portal' | 'free_apis' | 'gmail'>(() => {
+  const [activeTab, setActiveTabState] = useState<AppNavTab>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('portal')) return 'portal';
       const tabParam = params.get('tab');
-      if (tabParam && ['sop', 'pipeline', 'outreach', 'inbox', 'analytics', 'integrations', 'commissions', 'chat', 'vault', 'portal', 'free_apis', 'gmail'].includes(tabParam)) {
-        return tabParam as any;
+      if (tabParam && ['sop', 'pipeline', 'outreach', 'inbox', 'analytics', 'integrations', 'commissions', 'chat', 'vault', 'portal', 'free_apis', 'gmail', 'departmental', 'wiki'].includes(tabParam)) {
+        return tabParam as AppNavTab;
       }
     }
     return 'pipeline';
   });
 
-  const setActiveTab = (tab: 'sop' | 'pipeline' | 'outreach' | 'inbox' | 'analytics' | 'integrations' | 'commissions' | 'chat' | 'vault' | 'portal' | 'free_apis' | 'gmail') => {
+  const setActiveTab = (tab: AppNavTab) => {
     // RBAC check: Guest role cannot leave portal
     if (role === 'client_guest' && tab !== 'portal') {
       showToast('Restricted: Guest client access is isolated to the Client Portal.', 'warning');
@@ -230,6 +273,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
     setActiveTabState(tab);
   };
+
+  // Multi-Tenant States
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [currentTenant, setCurrentTenant] = useState<Tenant | null>(null);
+  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState<boolean>(false);
+
+  // Activity Feed & Notifications
+  const [isActivityFeedOpen, setIsActivityFeedOpen] = useState<boolean>(false);
+  const [activityFeed, setActivityFeed] = useState<ActivityFeedItem[]>([]);
+  const [unreadActivityCount, setUnreadActivityCount] = useState<number>(2);
+
+  // Wiki & Knowledge Base
+  const [isWikiModalOpen, setIsWikiModalOpen] = useState<boolean>(false);
+  const [wikiDocs, setWikiDocs] = useState<WikiDocument[]>([]);
+
+  // Departmental Progress & Workflow Tracking
+  const [departmentalProgress, setDepartmentalProgress] = useState<DepartmentalProgress[]>([]);
+
+  // Platform Health Modal
+  const [isPlatformHealthModalOpen, setIsPlatformHealthModalOpen] = useState<boolean>(false);
 
   const [activePortalProjectId, setActivePortalProjectId] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
@@ -258,6 +321,132 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isNewLeadModalOpen, setIsNewLeadModalOpen] = useState(false);
   const [discordExportModalData, setDiscordExportModalData] = useState<ProjectLead | null>(null);
   const [automatedTestsPassedCount, setAutomatedTestsPassedCount] = useState<number>(17);
+
+  // Load Tenants from API
+  const refreshTenants = async () => {
+    try {
+      const res = await fetch('/api/tenants');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.tenants)) {
+          setTenants(data.tenants);
+          const savedTenantId = typeof window !== 'undefined' ? localStorage.getItem('alm_nexus_tenant_id') : null;
+          const found = data.tenants.find((t: Tenant) => t.id === savedTenantId) || data.tenants[0];
+          if (found) {
+            setCurrentTenant(found);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch tenants list', e);
+    }
+  };
+
+  const switchTenant = async (tenantId: string) => {
+    const target = tenants.find(t => t.id === tenantId);
+    if (target) {
+      setCurrentTenant(target);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('alm_nexus_tenant_id', target.id);
+      }
+      showToast(`Switched active workspace to "${target.name}"`, 'info');
+      refreshActivityFeed();
+      refreshWikiDocs();
+      refreshDepartmentalProgress();
+    }
+  };
+
+  const refreshActivityFeed = async () => {
+    const tid = currentTenant?.id || 'all';
+    try {
+      const res = await fetch(`/api/tenants/${tid}/activity`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.activity)) {
+          setActivityFeed(data.activity);
+          const unread = data.activity.filter((a: ActivityFeedItem) => !a.isRead).length;
+          setUnreadActivityCount(unread);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch activity feed', e);
+    }
+  };
+
+  const markActivityAsRead = (id?: string) => {
+    if (id) {
+      setActivityFeed(prev => prev.map(a => a.id === id ? { ...a, isRead: true } : a));
+    } else {
+      setActivityFeed(prev => prev.map(a => ({ ...a, isRead: true })));
+      setUnreadActivityCount(0);
+    }
+  };
+
+  const refreshWikiDocs = async () => {
+    const tid = currentTenant?.id || 'all';
+    try {
+      const res = await fetch(`/api/tenants/${tid}/wiki`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.wikiDocs)) {
+          setWikiDocs(data.wikiDocs);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch wiki docs', e);
+    }
+  };
+
+  const refreshDepartmentalProgress = async () => {
+    const tid = currentTenant?.id || 'all';
+    try {
+      const res = await fetch(`/api/tenants/${tid}/departmental`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.departments)) {
+          setDepartmentalProgress(data.departments);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch departmental progress', e);
+    }
+  };
+
+  const onboardNewTenant = async (onboardingData: any): Promise<{ success: boolean; message?: string; tenant?: Tenant }> => {
+    try {
+      const res = await fetch('/api/tenants/onboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(onboardingData)
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.tenant) {
+        setTenants(prev => [data.tenant, ...prev]);
+        setCurrentTenant(data.tenant);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('alm_nexus_tenant_id', data.tenant.id);
+        }
+        if (data.token && data.user) {
+          setAuthToken(data.token);
+          setCurrentUser(data.user);
+          setRoleState(data.user.role);
+          localStorage.setItem('alm_nexus_token', data.token);
+          localStorage.setItem('alm_nexus_user', JSON.stringify(data.user));
+        }
+        showToast(`Workspace "${data.tenant.name}" created! Welcome, ${data.user?.name || 'Administrator'}!`, 'success');
+        refreshProjects();
+        refreshActivityFeed();
+        refreshWikiDocs();
+        refreshDepartmentalProgress();
+        setActiveTabState('pipeline');
+        return { success: true, tenant: data.tenant };
+      } else {
+        return { success: false, message: data.message || 'Onboarding failed.' };
+      }
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Network error during onboarding.' };
+    }
+  };
 
   // Database status loader
   const refreshDatabaseStatus = async () => {
@@ -359,6 +548,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     verifySession();
     refreshDatabaseStatus();
+    refreshTenants();
+    refreshActivityFeed();
+    refreshWikiDocs();
+    refreshDepartmentalProgress();
   }, []);
 
   // Sync user preferences to Firestore on change
@@ -474,12 +667,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const switchPersona = async (targetRole: UserRole) => {
     const personaCredentials: Record<UserRole, { email: string; pass: string }> = {
       admin: { email: 'admin@agencyops.dev', pass: 'Admin@12345' },
+      ceo: { email: 'admin@agencyops.dev', pass: 'Admin@12345' },
       bd_head: { email: 'admin@agencyops.dev', pass: 'Admin@12345' },
       coordinator: { email: 'coordinator@agencyops.dev', pass: 'Coord@12345' },
+      project_manager: { email: 'coordinator@agencyops.dev', pass: 'Coord@12345' },
       sales: { email: 'sales@agencyops.dev', pass: 'Sales@12345' },
       developer: { email: 'dev@agencyops.dev', pass: 'Dev@12345' },
+      designer: { email: 'design@agencyops.dev', pass: 'Design@12345' },
       collaborator: { email: 'partner@vance-capital.com', pass: 'Partner@12345' },
-      client_guest: { email: 'client@lumina-health.co.uk', pass: 'Client@12345' }
+      client_guest: { email: 'client@lumina-health.co.uk', pass: 'Client@12345' },
+      team_member: { email: 'client@lumina-health.co.uk', pass: 'Client@12345' }
     };
     const cred = personaCredentials[targetRole];
     if (cred) {
@@ -753,6 +950,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         switchPersona,
         isAuthModalOpen,
         setIsAuthModalOpen,
+        currentTenant,
+        tenants,
+        switchTenant,
+        refreshTenants,
+        isOnboardingModalOpen,
+        setIsOnboardingModalOpen,
+        onboardNewTenant,
+        isActivityFeedOpen,
+        setIsActivityFeedOpen,
+        activityFeed,
+        unreadActivityCount,
+        markActivityAsRead,
+        refreshActivityFeed,
+        isWikiModalOpen,
+        setIsWikiModalOpen,
+        wikiDocs,
+        refreshWikiDocs,
+        departmentalProgress,
+        refreshDepartmentalProgress,
+        isPlatformHealthModalOpen,
+        setIsPlatformHealthModalOpen,
         databaseStatus,
         refreshDatabaseStatus,
         isDatabaseModalOpen,

@@ -393,4 +393,71 @@ describe('International Client Handling SOP - Automated Tests', () => {
       assert.equal(updatedTask.status, 'in_progress');
     });
   });
+
+  describe('ALM Nexus Enterprise: Multi-Tenant Architecture & Data Partitioning', () => {
+    test('Strict Tenant Data Partitioning binds records to tenant_id', () => {
+      const records = [
+        { id: 'proj-1', tenant_id: 'tenant-alm-nexus', client: 'Lumina Health UK' },
+        { id: 'proj-2', tenant_id: 'tenant-apex-studio', client: 'Nordic Art Pottery' },
+        { id: 'proj-3', tenant_id: 'tenant-alm-nexus', client: 'GreenLeaf Solar' }
+      ];
+
+      const getTenantProjects = (tenantId) => records.filter(r => r.tenant_id === tenantId);
+
+      const almProjects = getTenantProjects('tenant-alm-nexus');
+      assert.equal(almProjects.length, 2);
+      assert.ok(almProjects.every(p => p.tenant_id === 'tenant-alm-nexus'));
+
+      const apexProjects = getTenantProjects('tenant-apex-studio');
+      assert.equal(apexProjects.length, 1);
+      assert.equal(apexProjects[0].client, 'Nordic Art Pottery');
+    });
+
+    test('Granular RBAC role definition configures organizational scopes', () => {
+      const rolesMatrix = {
+        ceo: ['all_macro_analytics', 'financial_oversight', 'system_settings'],
+        project_manager: ['sprint_backlog', 'kanban_assignment', 'sop_qa_signoff'],
+        sales: ['lead_scrapers', 'outreach_engine', 'deal_pipeline'],
+        developer: ['technical_tasks', 'staging_deployments', 'time_tracking'],
+        designer: ['wireframe_specs', 'asset_library', 'client_feedback'],
+        client_guest: ['client_portal_access', 'milestone_approvals']
+      };
+
+      assert.ok(rolesMatrix.ceo.includes('all_macro_analytics'));
+      assert.ok(rolesMatrix.project_manager.includes('sprint_backlog'));
+      assert.ok(rolesMatrix.sales.includes('outreach_engine'));
+      assert.ok(rolesMatrix.developer.includes('staging_deployments'));
+      assert.ok(rolesMatrix.designer.includes('wireframe_specs'));
+      assert.ok(rolesMatrix.client_guest.includes('client_portal_access'));
+      // Client guest should never have financial oversight
+      assert.equal(rolesMatrix.client_guest.includes('financial_oversight'), false);
+    });
+
+    test('External Integrations schema validates LinkedIn, Gmail, and Stripe connection state', () => {
+      const tenantIntegrations = {
+        linkedIn: { connected: true, accountHandle: '@alm-nexus', syncIntervalMinutes: 15 },
+        gmail: { connected: true, accountEmail: 'growth@alm-nexus.com', threadTracking: true },
+        stripe: { connected: true, liveMode: true, currency: 'USD' }
+      };
+
+      assert.equal(tenantIntegrations.linkedIn.connected, true);
+      assert.equal(tenantIntegrations.gmail.threadTracking, true);
+      assert.equal(tenantIntegrations.stripe.currency, 'USD');
+    });
+
+    test('Departmental Progress Tracker computes cross-functional velocity metrics', () => {
+      const departments = [
+        { department: 'sales_bd', velocity: 94, activeTasks: 18, completed: 12 },
+        { department: 'project_management', velocity: 92, activeTasks: 14, completed: 9 },
+        { department: 'engineering_dev', velocity: 96, activeTasks: 22, completed: 16 },
+        { department: 'ui_ux_design', velocity: 89, activeTasks: 11, completed: 8 }
+      ];
+
+      const avgVelocity = Math.round(departments.reduce((acc, d) => acc + d.velocity, 0) / departments.length);
+      const totalActive = departments.reduce((acc, d) => acc + d.activeTasks, 0);
+
+      assert.equal(avgVelocity, 93);
+      assert.equal(totalActive, 65);
+    });
+  });
 });

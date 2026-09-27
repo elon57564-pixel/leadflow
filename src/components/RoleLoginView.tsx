@@ -29,7 +29,7 @@ interface RoleLoginViewProps {
 }
 
 export const RoleLoginView: React.FC<RoleLoginViewProps> = ({ onSuccess }) => {
-  const { login, loginWithGoogle, isDark, setIsDark, showToast } = useApp();
+  const { login, loginWithGoogle, isDark, setIsDark, showToast, setIsOnboardingModalOpen } = useApp();
   const [selectedRole, setSelectedRole] = useState<UserRole>('admin');
   const [passwordOrPin, setPasswordOrPin] = useState<string>('1234');
   const [loading, setLoading] = useState<boolean>(false);
@@ -69,7 +69,7 @@ export const RoleLoginView: React.FC<RoleLoginViewProps> = ({ onSuccess }) => {
     {
       role: 'admin',
       name: 'Tariq Mehmood',
-      title: 'Agency Director & BD Head',
+      title: 'Chief Executive Officer (CEO)',
       email: 'admin@agencyops.dev',
       pass: 'Admin@12345',
       pin: '1234',
@@ -80,9 +80,22 @@ export const RoleLoginView: React.FC<RoleLoginViewProps> = ({ onSuccess }) => {
       accessHighlights: ['All 11 Modules', 'Financial Audits', 'Cloud SQL Sync']
     },
     {
+      role: 'coordinator',
+      name: 'Fatima Noor',
+      title: 'Project Operations Manager & QA',
+      email: 'coordinator@agencyops.dev',
+      pass: 'Coord@12345',
+      pin: '1234',
+      icon: Users,
+      accentColor: 'blue',
+      badgeStyle: 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20',
+      scopeSummary: 'SOP 1–11 enforcement, client briefing handovers, Discord team notifications, staging verification, and sprint backlogs.',
+      accessHighlights: ['SOP Gatekeeper', 'Delivery Pipeline', 'Team Chat']
+    },
+    {
       role: 'sales',
       name: 'Hamza Farooq',
-      title: 'Senior Business Development Specialist',
+      title: 'Business Development & Sales Specialist',
       email: 'sales@agencyops.dev',
       pass: 'Sales@12345',
       pin: '1234',
@@ -93,22 +106,9 @@ export const RoleLoginView: React.FC<RoleLoginViewProps> = ({ onSuccess }) => {
       accessHighlights: ['Pipeline Deals', 'Outreach Engine', 'Live Forex & DNS']
     },
     {
-      role: 'coordinator',
-      name: 'Fatima Noor',
-      title: 'Senior Project Coordinator & QA Lead',
-      email: 'coordinator@agencyops.dev',
-      pass: 'Coord@12345',
-      pin: '1234',
-      icon: Users,
-      accentColor: 'blue',
-      badgeStyle: 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20',
-      scopeSummary: 'SOP 1–11 enforcement, client briefing handovers, Discord team notifications, staging verification, and scope validation.',
-      accessHighlights: ['SOP Gatekeeper', 'Delivery Pipeline', 'Team Chat']
-    },
-    {
       role: 'developer',
       name: 'Zain Ul Abideen',
-      title: 'Lead Full-Stack Systems Engineer',
+      title: 'Lead Full-Stack Software Engineer',
       email: 'dev@agencyops.dev',
       pass: 'Dev@12345',
       pin: '1234',
@@ -119,9 +119,22 @@ export const RoleLoginView: React.FC<RoleLoginViewProps> = ({ onSuccess }) => {
       accessHighlights: ['Staging & QA', 'Server File Vault', 'SOP 17/17 Tests']
     },
     {
+      role: 'designer',
+      name: 'Sara Jenkins',
+      title: 'Lead UI/UX Designer & Creative Lead',
+      email: 'design@agencyops.dev',
+      pass: 'Design@12345',
+      pin: '1234',
+      icon: Sparkles,
+      accentColor: 'purple',
+      badgeStyle: 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/20',
+      scopeSummary: 'Wireframes, interactive mockups, brand assets, client design sign-offs, and geometric dark-mode styling library.',
+      accessHighlights: ['Design Assets', 'Wireframe Specs', 'Brand Guidelines']
+    },
+    {
       role: 'client_guest',
       name: 'Alexander Vance',
-      title: 'Client Stakeholder (Lumina Health UK)',
+      title: 'Client Stakeholder & Team Member',
       email: 'client@lumina-health.co.uk',
       pass: 'Client@12345',
       pin: '1234',
@@ -189,7 +202,7 @@ export const RoleLoginView: React.FC<RoleLoginViewProps> = ({ onSuccess }) => {
     <div className="w-full max-w-5xl mx-auto py-10 px-4 sm:px-6 animate-fadeIn">
       
       {/* Top Bar: Brand & Theme Toggle */}
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-white/10">
+      <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-white/10 flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20">
             <Shield className="w-5 h-5" />
@@ -197,25 +210,63 @@ export const RoleLoginView: React.FC<RoleLoginViewProps> = ({ onSuccess }) => {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-lg">
-                AgencyOps ALM
+                ALM Nexus Enterprise
               </span>
               <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700/50 font-mono">
-                RBAC Gatekeeper
+                Multi-Tenant SaaS
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              International Client Handling &amp; Project Operations Suite
+              Multi-Channel Outreach, Team Tracking &amp; Stripe Financials
             </p>
           </div>
         </div>
 
-        {/* Real Light / Dark / System Mode Toggle */}
-        <ThemeToggle variant="segmented" showLabels={true} />
+        <div className="flex items-center gap-3">
+          {/* New Company Onboarding CTA Button */}
+          <button
+            type="button"
+            onClick={() => setIsOnboardingModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-xs font-black shadow-md shadow-indigo-600/25 transition cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Get Started</span>
+          </button>
+
+          {/* Real Light / Dark / System Mode Toggle */}
+          <ThemeToggle variant="segmented" showLabels={true} />
+        </div>
       </div>
 
       {/* Main Container Card */}
       <div className="bg-white dark:bg-[#0d1322] border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl shadow-slate-900/5">
         
+        {/* New Tenant Setup Callout Banner */}
+        <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-blue-500/5 to-transparent border border-indigo-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/20">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                New Organization or Agency Setup?
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                Configure your company branding, LinkedIn automation, Gmail synchronization, and Stripe billing in 5 simple steps.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsOnboardingModalOpen(true)}
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer flex items-center gap-2 shrink-0"
+          >
+            <span>Get Started (Tenant Setup)</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
         {/* Header Heading */}
         <div className="text-center max-w-2xl mx-auto mb-8">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold mb-3 border border-slate-200 dark:border-white/10">

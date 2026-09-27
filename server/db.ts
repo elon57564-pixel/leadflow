@@ -1174,6 +1174,402 @@ export const DEFAULT_USERS = [
       'chat:write'
     ],
     createdAt: new Date().toISOString()
+  },
+  {
+    id: 'user-design-1',
+    name: 'Sara Jenkins',
+    email: 'design@agencyops.dev',
+    passwordHash: hashPassword('Design@12345'),
+    role: 'designer',
+    title: 'Lead UI/UX Designer & Brand Architect',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    permissions: [
+      'projects:read',
+      'projects:write',
+      'assets:manage',
+      'staging:review',
+      'wiki:write',
+      'chat:write'
+    ],
+    createdAt: new Date().toISOString()
+  }
+];
+
+// Production Multi-Tenant Configurations
+export const DEFAULT_TENANTS = [
+  {
+    id: 'tenant-alm-nexus',
+    name: 'ALM Nexus Enterprise',
+    slug: 'alm-nexus',
+    logoUrl: '/icon.svg',
+    branding: {
+      primaryColor: '#6366f1',
+      accentColor: '#06b6d4',
+      theme: 'dark' as const,
+      geometricStyle: 'cyber_glass' as const,
+      logoPreset: 'hexagon_nexus'
+    },
+    businessInfo: {
+      industry: 'B2B SaaS & Growth Operations',
+      description: 'Centralized all-in-one multi-channel marketing, sales automation, team progress tracking, and client delivery platform.',
+      website: 'https://alm-nexus.agencyops.dev',
+      targetRevenueUSD: 250000,
+      coreObjectives: [
+        'Automated multi-channel outreach (LinkedIn & Gmail)',
+        'Stripe billing & automated escrow milestone releases',
+        'Cross-departmental real-time velocity tracking',
+        'Unified Omni-Inbox with instant sentiment classification'
+      ]
+    },
+    integrations: {
+      linkedIn: {
+        connected: true,
+        accountHandle: '@alm-nexus-agency',
+        organizationName: 'ALM Nexus Growth Labs',
+        syncIntervalMinutes: 15,
+        autoOutreachEnabled: true,
+        lastSync: new Date().toISOString(),
+        messagesSyncedCount: 38
+      },
+      gmail: {
+        connected: true,
+        accountEmail: 'growth@alm-nexus.com',
+        threadTracking: true,
+        autoDraftReplies: true,
+        lastSync: new Date().toISOString(),
+        emailsSyncedCount: 142
+      },
+      stripe: {
+        connected: true,
+        liveMode: true,
+        publishableKeyMasked: 'pk_live_51M...nexus99',
+        currency: 'USD',
+        lastSync: new Date().toISOString(),
+        mrrUSD: 28400
+      }
+    },
+    rolesConfig: {
+      admin: {
+        role: 'admin',
+        title: 'Chief Executive Officer (CEO)',
+        department: 'executive',
+        dashboardLayout: 'executive_macro',
+        permissions: ['all']
+      },
+      coordinator: {
+        role: 'coordinator',
+        title: 'Project Manager (PM)',
+        department: 'operations',
+        dashboardLayout: 'pm_sprint',
+        permissions: ['projects:manage', 'sprints:manage', 'qa:verify', 'team:track']
+      },
+      sales: {
+        role: 'sales',
+        title: 'Business Development Specialist',
+        department: 'sales',
+        dashboardLayout: 'sales_outreach',
+        permissions: ['leads:generate', 'outreach:execute', 'deals:manage', 'commissions:view']
+      },
+      developer: {
+        role: 'developer',
+        title: 'Full-Stack Software Engineer',
+        department: 'engineering',
+        dashboardLayout: 'dev_tasks',
+        permissions: ['tasks:execute', 'staging:deploy', 'qa:test', 'timelogs:write']
+      },
+      designer: {
+        role: 'designer',
+        title: 'Lead UI/UX Designer',
+        department: 'design',
+        dashboardLayout: 'design_assets',
+        permissions: ['wireframes:manage', 'assets:upload', 'review:signoff']
+      },
+      client_guest: {
+        role: 'client_guest',
+        title: 'Client Stakeholder',
+        department: 'client',
+        dashboardLayout: 'client_portal',
+        permissions: ['portal:access', 'milestones:approve', 'invoices:pay']
+      }
+    },
+    activeMembersCount: 8,
+    createdAt: new Date(Date.now() - 3600000 * 24 * 30).toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'tenant-apex-media',
+    name: 'Apex Studio Ventures',
+    slug: 'apex-studio',
+    logoUrl: '/icon.svg',
+    branding: {
+      primaryColor: '#0ea5e9',
+      accentColor: '#10b981',
+      theme: 'dark' as const,
+      geometricStyle: 'monochrome_clean' as const,
+      logoPreset: 'cube_minimal'
+    },
+    businessInfo: {
+      industry: 'Creative Game Development & Web Apps',
+      description: 'High-performance interactive digital experiences and international bespoke web applications.',
+      website: 'https://apex-studio.example.com',
+      targetRevenueUSD: 180000,
+      coreObjectives: [
+        'Sprint-based game dev milestones',
+        'Staging QA and client acceptance workflows',
+        'Inbound enterprise RFPs'
+      ]
+    },
+    integrations: {
+      linkedIn: {
+        connected: false,
+        syncIntervalMinutes: 30,
+        autoOutreachEnabled: false
+      },
+      gmail: {
+        connected: true,
+        accountEmail: 'partnerships@apex-studio.com',
+        threadTracking: true,
+        autoDraftReplies: false,
+        lastSync: new Date().toISOString(),
+        emailsSyncedCount: 47
+      },
+      stripe: {
+        connected: true,
+        liveMode: false,
+        publishableKeyMasked: 'pk_test_51M...apex21',
+        currency: 'USD',
+        lastSync: new Date().toISOString(),
+        mrrUSD: 9800
+      }
+    },
+    rolesConfig: {
+      admin: {
+        role: 'admin',
+        title: 'Managing Director',
+        department: 'executive',
+        dashboardLayout: 'executive_macro',
+        permissions: ['all']
+      }
+    },
+    activeMembersCount: 5,
+    createdAt: new Date(Date.now() - 3600000 * 24 * 14).toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+
+// Production Real-Time Activity Feed Items
+export const DEFAULT_ACTIVITY_FEED = [
+  {
+    id: 'act-1',
+    tenantId: 'tenant-alm-nexus',
+    type: 'payment_captured',
+    title: 'Stripe 50% Deposit Captured ($625.00 USD)',
+    description: 'Alexander Vance cleared milestone advance for Lumina Health Clinics UK. Sprint kickoff confirmed.',
+    actorName: 'Stripe Global Webhook',
+    actorRole: 'Automated Gateway',
+    sourceChannel: 'stripe',
+    timestamp: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
+    isRead: false
+  },
+  {
+    id: 'act-2',
+    tenantId: 'tenant-alm-nexus',
+    type: 'lead_scraped',
+    title: 'LinkedIn Lead Generator Discovered 5 RFP Posts',
+    description: 'Matched keywords "e-commerce store setup" and "web developer needed" with average budget $850.',
+    actorName: 'Agent-Reach Scraper',
+    actorRole: 'Autonomous Bot',
+    sourceChannel: 'linkedin',
+    timestamp: new Date(Date.now() - 1000 * 60 * 42).toISOString(),
+    isRead: false
+  },
+  {
+    id: 'act-3',
+    tenantId: 'tenant-alm-nexus',
+    type: 'staging_deployed',
+    title: 'Staging Environment Live & QA Passed',
+    description: 'Zain Ul Abideen completed internal verification for Nordic Art Pottery on staging-nordic.internal-agency.app',
+    actorName: 'Zain Ul Abideen',
+    actorRole: 'Lead Systems Engineer',
+    sourceChannel: 'system',
+    timestamp: new Date(Date.now() - 1000 * 60 * 115).toISOString(),
+    isRead: true
+  },
+  {
+    id: 'act-4',
+    tenantId: 'tenant-alm-nexus',
+    type: 'message_received',
+    title: 'New High-Sentiment InMail Reply from Alexander Vance',
+    description: '"Looks great! Ready to review staging with our medical directors tomorrow afternoon."',
+    actorName: 'Alexander Vance',
+    actorRole: 'Client Stakeholder',
+    sourceChannel: 'linkedin',
+    timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
+    isRead: true
+  }
+];
+
+// Production Global Company Wiki / Knowledge Base
+export const DEFAULT_WIKI_DOCS = [
+  {
+    id: 'wiki-1',
+    tenantId: 'tenant-alm-nexus',
+    title: 'LinkedIn Outreach Master Script (High-Converting <300 Chars)',
+    category: 'outreach_scripts',
+    description: 'Word-for-word connection pitch that yields 42% acceptance rate with international founders.',
+    content: `Hi {{name}}, saw your recent post regarding {{companyName}}'s web development roadmap.
+
+We build modern, fast Next.js & Tailwind web applications with guaranteed 10-day sprint delivery and strict 50% escrow milestones.
+
+Would love to share our live interactive preview deck if you're open to a 2-minute look. Best, Tariq`,
+    author: 'Tariq Mehmood (CEO)',
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
+    tags: ['linkedin', 'cold_outreach', 'conversion']
+  },
+  {
+    id: 'wiki-2',
+    tenantId: 'tenant-alm-nexus',
+    title: 'SOP 50% Advance Payment & Staging Isolation Gate',
+    category: 'sop_checklists',
+    description: 'Non-negotiable rule: Never provision live production domain without 100% balance clearance.',
+    content: `### Mandatory Payment Gatekeeper Protocol:
+1. Always secure 50% deposit before creating Git repositories or allocating engineering hours.
+2. Develop strictly on internal staging subdomains (e.g., https://staging-client.agencyops.dev).
+3. Client inspects and signs off on staging.
+4. Issue final 50% balance invoice via Stripe or PayPal.
+5. Only upon transaction ID verification: trigger DNS A-record cutover and transfer administrative credentials.`,
+    author: 'Fatima Noor (QA Lead)',
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
+    tags: ['sop', 'security', 'escrow', 'payments']
+  },
+  {
+    id: 'wiki-3',
+    tenantId: 'tenant-alm-nexus',
+    title: 'ALM Nexus Dark-Mode & Geometric Brand Design Principles',
+    category: 'brand_guidelines',
+    description: 'Aesthetic guidelines: Anti-AI slop, geometric accents, zero-pill discipline, high information density.',
+    content: `### Design System Guidelines:
+- **Color Palette:** Deep slate (#070a12, #0d1322), Indigo accents (#6366f1), Cyan telemetry (#06b6d4).
+- **Typography:** Plus Jakarta Sans for UI headers, JetBrains Mono for financial figures and status badges.
+- **Glassmorphism:** Subtle backdrops with 16px blur and 1px white/10 borders.
+- **Data Clarity:** Never hide operational metrics behind ambiguous tooltips; show real numbers.`,
+    author: 'Sara Jenkins (Design Lead)',
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 7).toISOString(),
+    tags: ['design', 'ui_ux', 'brand', 'tailwind']
+  },
+  {
+    id: 'wiki-4',
+    tenantId: 'tenant-alm-nexus',
+    title: 'Cold Email Follow-Up Drip 4-Stage Cadence',
+    category: 'email_templates',
+    description: 'Sequenced email follow-ups for non-responsive client proposals to reactivate discussions.',
+    content: `Stage 1 (+24h): Sprint Slot Reservation Confirmation
+Stage 2 (+72h): Dedicated Staging Server Pre-Allocation Hold
+Stage 3 (+120h): Complimentary Performance & Core Web Vitals Audit
+Stage 4 (+168h): Graceful File Archival (Break-Up Email)`,
+    author: 'Hamza Farooq (Senior BD)',
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
+    tags: ['drip', 'sales', 'follow_up']
+  }
+];
+
+// Production Departmental Tracking Metrics
+export const DEFAULT_DEPARTMENTAL_PROGRESS = [
+  {
+    department: 'sales_bd',
+    name: 'Business Development & Growth',
+    leadName: 'Hamza Farooq',
+    leadAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    healthStatus: 'optimal',
+    metrics: {
+      primaryMetricLabel: 'Pipeline Value',
+      primaryMetricValue: '$14,250',
+      velocityScore: 94,
+      activeTasksCount: 18,
+      completedThisWeekCount: 12,
+      slaAdherencePercent: 97
+    },
+    highlights: [
+      'Scraped 24 qualified leads across LinkedIn & Upwork today',
+      'Average response time to client InMail: 14 minutes',
+      'Closed 50% advance deposit on Lumina Health ($625)'
+    ],
+    activeMilestones: [
+      { title: 'Scale LinkedIn InMail campaign to 50 founders/day', owner: 'Hamza Farooq', status: 'in_progress', dueDate: '2026-09-30', progressPercent: 75 },
+      { title: 'Finalize Nordic Art Pottery contract amendment', owner: 'Hamza Farooq', status: 'completed', dueDate: '2026-09-26', progressPercent: 100 }
+    ]
+  },
+  {
+    department: 'project_management',
+    name: 'Project Operations & Delivery',
+    leadName: 'Fatima Noor',
+    leadAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+    healthStatus: 'optimal',
+    metrics: {
+      primaryMetricLabel: 'Active Sprints',
+      primaryMetricValue: '4 Sprints',
+      velocityScore: 92,
+      activeTasksCount: 14,
+      completedThisWeekCount: 9,
+      slaAdherencePercent: 99
+    },
+    highlights: [
+      '100% SOP Step 1–11 protocol adherence maintained',
+      'Zero staging leaks or premature domain cutovers',
+      'Automated Discord milestone broadcasts running smoothly'
+    ],
+    activeMilestones: [
+      { title: 'Lumina Health Staging QA verification sign-off', owner: 'Fatima Noor', status: 'completed', dueDate: '2026-09-25', progressPercent: 100 },
+      { title: 'Prepare kickoff briefing for GreenLeaf Solar', owner: 'Fatima Noor', status: 'in_progress', dueDate: '2026-09-28', progressPercent: 60 }
+    ]
+  },
+  {
+    department: 'engineering_dev',
+    name: 'Full-Stack Engineering & DevOps',
+    leadName: 'Zain Ul Abideen',
+    leadAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+    healthStatus: 'optimal',
+    metrics: {
+      primaryMetricLabel: 'QA Pass Rate',
+      primaryMetricValue: '100% (17/17)',
+      velocityScore: 96,
+      activeTasksCount: 22,
+      completedThisWeekCount: 16,
+      slaAdherencePercent: 98
+    },
+    highlights: [
+      'Staging subdomains running with auto-provisioned SSL',
+      'Dual persistence active (PostgreSQL pool + atomic JSON fallback)',
+      'Sub-50ms API response time across all tenant routes'
+    ],
+    activeMilestones: [
+      { title: 'Multi-tenant database foreign key partitioning', owner: 'Zain Ul Abideen', status: 'completed', dueDate: '2026-09-27', progressPercent: 100 },
+      { title: 'Cloudflare DNS auto-cutover automation test', owner: 'Zain Ul Abideen', status: 'in_progress', dueDate: '2026-09-29', progressPercent: 80 }
+    ]
+  },
+  {
+    department: 'ui_ux_design',
+    name: 'UI/UX Design & Brand Strategy',
+    leadName: 'Sara Jenkins',
+    leadAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    healthStatus: 'optimal',
+    metrics: {
+      primaryMetricLabel: 'Design Deliverables',
+      primaryMetricValue: '14 Approved',
+      velocityScore: 89,
+      activeTasksCount: 11,
+      completedThisWeekCount: 8,
+      slaAdherencePercent: 95
+    },
+    highlights: [
+      'Minimalist dark-mode geometric design library published',
+      'Responsive wireframes for Lumina Health 9-page clinic portal',
+      'Client presentation decks prepared for high-ticket pitches'
+    ],
+    activeMilestones: [
+      { title: 'Interactive design mockup for FinTech SaaS client', owner: 'Sara Jenkins', status: 'in_progress', dueDate: '2026-09-30', progressPercent: 65 },
+      { title: 'Social share cards & OpenGraph asset bundle', owner: 'Sara Jenkins', status: 'completed', dueDate: '2026-09-26', progressPercent: 100 }
+    ]
   }
 ];
 
@@ -1524,6 +1920,10 @@ export function loadLocalDB(initialFallbackData: any): any {
       connectors: Array.isArray(parsed.connectors) && parsed.connectors.length > 0 ? parsed.connectors : DEFAULT_CONNECTORS,
       apiTokens: Array.isArray(parsed.apiTokens) && parsed.apiTokens.length > 0 ? parsed.apiTokens : (initialFallbackData?.apiTokens || DEFAULT_API_TOKENS),
       auditLogs: Array.isArray(parsed.auditLogs) && parsed.auditLogs.length > 0 ? parsed.auditLogs : (initialFallbackData?.auditLogs || DEFAULT_AUDIT_LOGS),
+      tenants: Array.isArray(parsed.tenants) && parsed.tenants.length > 0 ? parsed.tenants : DEFAULT_TENANTS,
+      activityFeed: Array.isArray(parsed.activityFeed) && parsed.activityFeed.length > 0 ? parsed.activityFeed : DEFAULT_ACTIVITY_FEED,
+      wikiDocs: Array.isArray(parsed.wikiDocs) && parsed.wikiDocs.length > 0 ? parsed.wikiDocs : DEFAULT_WIKI_DOCS,
+      departmentalProgress: Array.isArray(parsed.departmentalProgress) && parsed.departmentalProgress.length > 0 ? parsed.departmentalProgress : DEFAULT_DEPARTMENTAL_PROGRESS,
       webhookLogs: Array.isArray(parsed.webhookLogs) ? parsed.webhookLogs : []
     };
 

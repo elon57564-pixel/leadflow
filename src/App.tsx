@@ -14,6 +14,11 @@ import { SecureFileVault } from './components/SecureFileVault';
 import { ClientPortalView } from './components/ClientPortalView';
 import { FreeApiToolsView } from './components/FreeApiToolsView';
 import { GmailWorkspaceView } from './components/GmailWorkspaceView';
+import { DepartmentalTrackingView } from './components/DepartmentalTrackingView';
+import { TenantOnboardingModal } from './components/TenantOnboardingModal';
+import { ActivityFeedDrawer } from './components/ActivityFeedDrawer';
+import { CompanyWikiModal } from './components/CompanyWikiModal';
+import { PlatformHealthModal } from './components/PlatformHealthModal';
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -46,6 +51,14 @@ const AppContent: React.FC = () => {
     setActiveTab,
     isAISettingsModalOpen,
     setIsAISettingsModalOpen,
+    isOnboardingModalOpen,
+    setIsOnboardingModalOpen,
+    isActivityFeedOpen,
+    setIsActivityFeedOpen,
+    isWikiModalOpen,
+    setIsWikiModalOpen,
+    isPlatformHealthModalOpen,
+    setIsPlatformHealthModalOpen,
     toasts,
     dismissToast,
     projects,
@@ -77,6 +90,12 @@ const AppContent: React.FC = () => {
         return (
           <RoleRouteGuard allowedRoles={['admin', 'bd_head', 'sales', 'coordinator', 'developer', 'collaborator']} moduleName="Pipeline & Lead Deals">
             <ProjectsPipeline />
+          </RoleRouteGuard>
+        );
+      case 'departmental':
+        return (
+          <RoleRouteGuard allowedRoles={['admin', 'ceo', 'bd_head', 'coordinator', 'project_manager', 'sales', 'developer', 'designer']} moduleName="Departmental Velocity & Progress">
+            <DepartmentalTrackingView />
           </RoleRouteGuard>
         );
       case 'gmail':
@@ -263,6 +282,24 @@ const AppContent: React.FC = () => {
       <GDPRComplianceModal />
       <AuthModal />
       <DiscordExportModal />
+
+      {/* Enterprise Multi-Tenant Modals & Real-time Drawers */}
+      <TenantOnboardingModal
+        isOpen={isOnboardingModalOpen}
+        onClose={() => setIsOnboardingModalOpen(false)}
+      />
+      <ActivityFeedDrawer
+        isOpen={isActivityFeedOpen}
+        onClose={() => setIsActivityFeedOpen(false)}
+      />
+      <CompanyWikiModal
+        isOpen={isWikiModalOpen}
+        onClose={() => setIsWikiModalOpen(false)}
+      />
+      <PlatformHealthModal
+        isOpen={isPlatformHealthModalOpen}
+        onClose={() => setIsPlatformHealthModalOpen(false)}
+      />
 
       {/* Toast Feedback */}
       <ToastNotification toasts={toasts} onDismiss={dismissToast} />
