@@ -45,7 +45,7 @@ interface AppContextType {
   isAuthenticated: boolean;
   firebaseUser: FirebaseUser | null;
   isFirebaseConnected: boolean;
-  loginWithGoogle: () => Promise<{ success: boolean; message?: string }>;
+  loginWithGoogle: () => Promise<{ success: boolean; message?: string; cancelled?: boolean }>;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   switchPersona: (role: UserRole) => Promise<void>;
@@ -575,7 +575,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     switchPersona(newRole);
   };
 
-  const loginWithGoogle = async (): Promise<{ success: boolean; message?: string }> => {
+  const loginWithGoogle = async (): Promise<{ success: boolean; message?: string; cancelled?: boolean }> => {
     try {
       const res = await signInWithGoogle();
       if (res.success && res.user) {
@@ -607,6 +607,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         showToast(`Signed in with Google as ${userObj.name}!`, 'success');
         return { success: true };
+      } else if (res.cancelled) {
+        // User closed or dismissed the popup; gently notify without error
+        showToast('Google sign-in was cancelled.', 'info');
+        return { success: false, message: 'Google sign-in cancelled.', cancelled: true };
       } else {
         showToast(res.error || 'Google Sign-In failed', 'warning');
         return { success: false, message: res.error || 'Google Sign-In failed.' };

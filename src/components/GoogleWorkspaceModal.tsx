@@ -100,6 +100,8 @@ export const GoogleWorkspaceModal: React.FC<GoogleWorkspaceModalProps> = ({
         showToast('Connected to Google Workspace (Sheets, Tasks, Calendar, Docs)!');
         googleSheetsService.listSpreadsheets().then(setSpreadsheets).catch(() => {});
         googleCalendarService.listUpcomingEvents(10).then(setCalendarEvents).catch(() => {});
+      } else if (res.cancelled) {
+        showToast('Google Workspace connection was cancelled.', 'info');
       } else if (res.error) {
         showToast(res.error, 'error');
       }

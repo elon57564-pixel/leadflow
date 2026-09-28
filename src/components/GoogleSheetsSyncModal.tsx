@@ -79,6 +79,8 @@ export const GoogleSheetsSyncModal: React.FC<GoogleSheetsSyncModalProps> = ({
         setIsConnected(true);
         showToast('Google Account connected with Google Sheets & Drive scopes.');
         loadSpreadsheetsList();
+      } else if (res.cancelled) {
+        showToast('Google Sheets authorization was cancelled.', 'info');
       } else if (res.error) {
         showToast(res.error, 'error');
       }

@@ -43,7 +43,7 @@ export const RoleLoginView: React.FC<RoleLoginViewProps> = ({ onSuccess }) => {
       const res = await loginWithGoogle();
       if (res.success) {
         if (onSuccess) onSuccess();
-      } else {
+      } else if (!res.cancelled) {
         setErrorMessage(res.message || 'Google Sign-In failed.');
       }
     } catch (err: any) {

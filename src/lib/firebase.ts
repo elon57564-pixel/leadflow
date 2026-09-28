@@ -243,10 +243,18 @@ export interface UserPreferences {
   updatedAt?: any;
 }
 
+export interface SignInWithGoogleResult {
+  success: boolean;
+  user?: FirebaseUser;
+  accessToken?: string;
+  error?: string;
+  cancelled?: boolean;
+}
+
 /**
  * Sign in using Google Sign-In popup with Firebase Auth and Gmail Workspace scopes
  */
-export async function signInWithGoogle(): Promise<{ success: boolean; user?: FirebaseUser; accessToken?: string; error?: string }> {
+export async function signInWithGoogle(): Promise<SignInWithGoogleResult> {
   try {
     isSigningIn = true;
     const result = await signInWithPopup(auth, googleProvider);
@@ -256,18 +264,38 @@ export async function signInWithGoogle(): Promise<{ success: boolean; user?: Fir
     }
     return { success: true, user: result.user, accessToken: cachedAccessToken || undefined };
   } catch (error: any) {
-    console.error('Firebase Google Sign-In error:', error);
+    const isCancelled =
+      error?.code === 'auth/popup-closed-by-user' ||
+      error?.code === 'auth/cancelled-popup-request' ||
+      error?.code === 'auth/user-cancelled' ||
+      (typeof error?.message === 'string' && (
+        error.message.includes('popup-closed-by-user') ||
+        error.message.includes('cancelled-popup-request') ||
+        error.message.includes('user cancelled')
+      ));
+
     let errorMessage = 'Google Sign-In failed. Please try again.';
-    if (error.code === 'auth/popup-closed-by-user') {
+    if (isCancelled) {
       errorMessage = 'Sign-in cancelled: The Google sign-in window was closed.';
-    } else if (error.code === 'auth/popup-blocked') {
-      errorMessage = 'Sign-in popup was blocked by your browser. Please allow popups for this site.';
-    } else if (error.code === 'auth/unauthorized-domain') {
-      errorMessage = 'This domain is not authorized for OAuth operations in Firebase console.';
-    } else if (error.message) {
-      errorMessage = error.message;
+      // User closed the popup intentionally - log at info level, do not log console.error
+      console.info('Google Sign-In prompt was dismissed by user.');
+      return { success: false, error: errorMessage, cancelled: true };
     }
-    return { success: false, error: errorMessage };
+
+    if (error?.code === 'auth/popup-blocked') {
+      errorMessage = 'Sign-in popup was blocked by your browser. Please allow popups for this site.';
+      console.warn('Google Sign-In popup blocked:', error?.message);
+    } else if (error?.code === 'auth/unauthorized-domain') {
+      errorMessage = 'This domain is not authorized for OAuth operations in Firebase console.';
+      console.warn('Google Sign-In unauthorized domain:', error?.message);
+    } else if (error?.message) {
+      errorMessage = error.message;
+      console.warn('Google Sign-In failed:', error.message);
+    } else {
+      console.warn('Google Sign-In encountered an issue:', error);
+    }
+
+    return { success: false, error: errorMessage, cancelled: false };
   } finally {
     isSigningIn = false;
   }
@@ -280,7 +308,7 @@ export async function signOutFirebase(): Promise<void> {
   try {
     await signOut(auth);
   } catch (error) {
-    console.error('Firebase sign-out error:', error);
+    console.warn('Firebase sign-out notice:', error);
   } finally {
     cachedAccessToken = null;
   }

@@ -33,7 +33,7 @@ export const AuthModal: React.FC = () => {
     setGoogleLoading(false);
     if (res.success) {
       setIsAuthModalOpen(false);
-    } else {
+    } else if (!res.cancelled) {
       setError(res.message || 'Google Sign-In failed.');
     }
   };
