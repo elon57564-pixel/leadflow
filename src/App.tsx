@@ -75,6 +75,11 @@ const AppContent: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 flex flex-col justify-center items-center p-4 selection:bg-indigo-600 selection:text-white transition-colors duration-200">
         <RoleLoginView />
+        <TenantOnboardingModal
+          isOpen={isOnboardingModalOpen}
+          onClose={() => setIsOnboardingModalOpen(false)}
+        />
+        <AuthModal />
         <ToastNotification toasts={toasts} onDismiss={dismissToast} />
       </div>
     );

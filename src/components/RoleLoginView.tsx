@@ -227,7 +227,8 @@ export const RoleLoginView: React.FC<RoleLoginViewProps> = ({ onSuccess }) => {
           <button
             type="button"
             onClick={() => setIsOnboardingModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-xs font-black shadow-md shadow-indigo-600/25 transition cursor-pointer"
+            aria-label="Get Started with Tenant Setup"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 active:scale-95 text-white text-xs font-black shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Get Started</span>
@@ -260,7 +261,8 @@ export const RoleLoginView: React.FC<RoleLoginViewProps> = ({ onSuccess }) => {
           <button
             type="button"
             onClick={() => setIsOnboardingModalOpen(true)}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer flex items-center gap-2 shrink-0"
+            aria-label="Launch Tenant Onboarding Setup"
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all cursor-pointer flex items-center gap-2 shrink-0"
           >
             <span>Get Started (Tenant Setup)</span>
             <ArrowRight className="w-3.5 h-3.5" />
