@@ -23,6 +23,7 @@ import {
   ClientGeoInfo
 } from '../services/freeApis';
 import { useApp } from '../context/AppContext';
+import { LeadFlowFreeToolsSection } from './LeadFlowFreeToolsSection';
 
 export const FreeApiToolsView: React.FC = () => {
   const { showToast, isDark } = useApp();
@@ -367,6 +368,11 @@ export const FreeApiToolsView: React.FC = () => {
           </div>
         </div>
 
+      </div>
+
+      {/* LeadFlow GTM & Outbound Tools Suite */}
+      <div className="pt-2">
+        <LeadFlowFreeToolsSection />
       </div>
     </div>
   );

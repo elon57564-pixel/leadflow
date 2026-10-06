@@ -43,6 +43,8 @@ import { ToastNotification } from './components/ToastNotification';
 import { RoleLoginView } from './components/RoleLoginView';
 import { RoleRouteGuard } from './components/RoleRouteGuard';
 import { OfflineSyncBanner } from './components/OfflineSyncBanner';
+import { LeadFlowLandingView } from './components/LeadFlowLandingView';
+import { X } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const {
@@ -69,12 +71,36 @@ const AppContent: React.FC = () => {
   } = useApp();
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Strict Gatekeeper: Main app is completely hidden behind the Login Portal until authenticated
+  // When not authenticated, display the full LeadFlow Agency experience by default,
+  // allowing visitors to explore features, calculate ROI, test free tools, book a call,
+  // or launch/sign into the ALM Nexus internal operations portal.
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 flex flex-col justify-center items-center p-4 selection:bg-indigo-600 selection:text-white transition-colors duration-200">
-        <RoleLoginView />
+      <div className="min-h-screen bg-slate-50 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-600 selection:text-white transition-colors duration-200">
+        <LeadFlowLandingView
+          onOpenLoginModal={() => setShowLoginModal(true)}
+          onEnterWorkspace={() => setShowLoginModal(true)}
+        />
+
+        {/* Modal for Role / Account Login */}
+        {showLoginModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md overflow-y-auto animate-fadeIn">
+            <div className="relative w-full max-w-5xl my-auto">
+              <button
+                type="button"
+                onClick={() => setShowLoginModal(false)}
+                className="absolute top-4 right-4 z-50 p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-500 hover:text-slate-900 dark:hover:text-white transition cursor-pointer shadow-md"
+                aria-label="Close Login Modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <RoleLoginView onSuccess={() => setShowLoginModal(false)} />
+            </div>
+          </div>
+        )}
+
         <TenantOnboardingModal
           isOpen={isOnboardingModalOpen}
           onClose={() => setIsOnboardingModalOpen(false)}
@@ -169,6 +195,8 @@ const AppContent: React.FC = () => {
             <IntegrationsView />
           </RoleRouteGuard>
         );
+      case 'leadflow':
+        return <LeadFlowLandingView onEnterWorkspace={() => setActiveTab('pipeline')} />;
       default:
         return <ProjectsPipeline />;
     }

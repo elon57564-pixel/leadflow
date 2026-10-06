@@ -28,6 +28,7 @@ interface TopHeaderProps {
 export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => {
   const {
     activeTab,
+    setActiveTab,
     role,
     currentUser,
     firebaseUser,
@@ -122,6 +123,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         >
           <Activity className="w-3.5 h-3.5" />
           <span>Health OK</span>
+        </button>
+
+        {/* LeadFlow Agency GTM Portal Quick Button */}
+        <button
+          onClick={() => setActiveTab('leadflow')}
+          className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-xs font-bold transition cursor-pointer"
+          title="View LeadFlow Agency Public Website"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+          <span>LeadFlow Site</span>
         </button>
 
         {/* Professional Real Light / Dark / System Mode Switcher */}

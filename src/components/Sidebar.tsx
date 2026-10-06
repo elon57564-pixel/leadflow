@@ -74,6 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
 
   // Role-based navigation matrix
   const navItems = [
+    { id: 'leadflow', label: 'LeadFlow Agency (GTM)', icon: Sparkles, badge: 'Agency Hub', roles: ['admin', 'ceo', 'bd_head', 'sales', 'coordinator', 'project_manager', 'developer', 'designer', 'collaborator', 'client_guest', 'team_member'] },
     { id: 'pipeline', label: 'Pipeline & Deals', icon: Kanban, roles: ['admin', 'ceo', 'bd_head', 'sales', 'coordinator', 'project_manager', 'developer', 'designer', 'collaborator'] },
     { id: 'departmental', label: 'Department Velocity', icon: Layers, roles: ['admin', 'ceo', 'bd_head', 'coordinator', 'project_manager', 'sales', 'developer', 'designer'] },
     { id: 'gmail', label: 'Gmail Workspace', icon: Mail, roles: ['admin', 'ceo', 'bd_head', 'sales', 'coordinator', 'project_manager', 'developer'] },

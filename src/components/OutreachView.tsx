@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { ScrapedLead, ScraperConfig, AIOutreachRequest, AIOutreachResponse, DripFollowUpStage } from '../types';
 import { generateAI, generateOfflineFallback } from '../services/aiService';
+import { LeadFlowEngineSection } from './LeadFlowEngineSection';
 import {
   Radar,
   Search,
@@ -42,8 +43,8 @@ export const OutreachView: React.FC = () => {
     setIsAISettingsModalOpen
   } = useApp();
 
-  // Sub-tabs: 'scraper' | 'generator' | 'drip'
-  const [activeSubTab, setActiveSubTab] = useState<'scraper' | 'generator' | 'drip'>('scraper');
+  // Sub-tabs: 'scraper' | 'generator' | 'drip' | 'leadflow_engine'
+  const [activeSubTab, setActiveSubTab] = useState<'scraper' | 'generator' | 'drip' | 'leadflow_engine'>('scraper');
 
   // ==========================================
   // 1. SCRAPER STATE
@@ -426,6 +427,21 @@ export const OutreachView: React.FC = () => {
                   {dripCampaigns.length}
                 </span>
               )}
+            </button>
+
+            <button
+              onClick={() => setActiveSubTab('leadflow_engine')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                activeSubTab === 'leadflow_engine'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-2xs font-bold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+              <span>LeadFlow GTM Engine</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 font-bold">
+                Multi-Channel
+              </span>
             </button>
           </div>
         </div>
@@ -1391,6 +1407,13 @@ export const OutreachView: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 4. LEADFLOW MANAGED GTM ENGINE VIEW */}
+      {/* ======================================================== */}
+      {activeSubTab === 'leadflow_engine' && (
+        <LeadFlowEngineSection />
       )}
     </div>
   );
