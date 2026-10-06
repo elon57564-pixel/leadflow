@@ -2,8 +2,19 @@ import express, { Request, Response } from 'express';
 import http from 'http';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import { createServer as createViteServer } from 'vite';
+
+// Resolve __dirname and __filename across both ESM (tsx) and CJS (dist bundle)
+const getFilename = () => {
+  try {
+    return fileURLToPath(import.meta.url);
+  } catch {
+    return typeof __filename !== 'undefined' ? __filename : '';
+  }
+};
+const appFilename = getFilename();
+const appDirname = appFilename ? path.dirname(appFilename) : process.cwd();
 
 // Database & Persistence initialization
 import { initPostgresPool, readDB, writeDB, INITIAL_DB } from './server/db';
@@ -32,13 +43,41 @@ import {
 
 dotenv.config();
 
+// Global crash resilience for production deployments
+process.on('unhandledRejection', (reason, promise) => {
+  console.warn('[Server] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('[Server] Uncaught Exception:', error);
+});
+
 const app = express();
-const PORT = 3000;
+
+// Detect AI Studio container preview environment vs external hosting platforms (Railway, Render, Cloud Run, etc.)
+const isAiStudioSandbox = Boolean(process.env.APPLET_ID || process.env.DEFAULT_APP_PORT);
+
+// In AI Studio preview environment, Node dev server must listen on port 3000 (reverse proxied by container nginx on 8080).
+// In external platforms like Railway, Render, or Docker, read PORT from process.env.PORT (e.g., 8080 or dynamic port).
+const PORT: number = isAiStudioSandbox
+  ? Number(process.env.DEFAULT_APP_PORT || 3000)
+  : (process.env.PORT ? parseInt(process.env.PORT, 10) : 3000);
 
 // Global Middlewares
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(authenticateToken);
+
+// Health check endpoint for Railway, Render, Kubernetes, and load balancers
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+    port: PORT,
+    platform: process.env.RAILWAY_ENVIRONMENT ? 'railway' : (isAiStudioSandbox ? 'ai-studio' : 'standalone')
+  });
+});
 
 // ==========================================
 // MOUNT MODULAR API ROUTERS
@@ -96,13 +135,41 @@ export { readDB, writeDB, INITIAL_DB };
 // ==========================================
 async function startServer() {
   // Initialize PostgreSQL pool if DATABASE_URL configured
-  await initPostgresPool();
+  try {
+    await initPostgresPool();
+  } catch (err: any) {
+    console.warn(`[Database Engine] Initial pool setup warning: ${err.message}. Continuing with local fallback.`);
+  }
 
   const server = http.createServer(app);
-  const isProd = process.env.NODE_ENV === 'production';
   const isHmrDisabled = process.env.DISABLE_HMR === 'true';
 
+  // Resolve production static dist path with comprehensive fallbacks
+  const candidatePaths = [
+    path.join(process.cwd(), 'dist'),
+    path.resolve(appDirname, 'dist'),
+    path.resolve(appDirname, '../dist'),
+    appDirname,
+    process.cwd()
+  ];
+  const distPath = candidatePaths.find(p => fs.existsSync(path.join(p, 'index.html'))) || candidatePaths[0];
+  const distHtmlExists = fs.existsSync(path.join(distPath, 'index.html'));
+  const isCompiledBundle = Boolean(appFilename && (appFilename.endsWith('.cjs') || appDirname.includes('dist')));
+
+  // Production detection:
+  // 1. Explicit NODE_ENV === 'production'
+  // 2. Railway environment variables (RAILWAY_ENVIRONMENT, RAILWAY_SERVICE_ID, etc.)
+  // 3. Render / Heroku environments
+  // 4. Running compiled bundle (dist/server.cjs) and dist/index.html is found
+  // 5. Outside AI Studio sandbox and dist/index.html is found
+  const isProd = process.env.NODE_ENV === 'production' ||
+                 Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_ID || process.env.RAILWAY_STATIC_URL || process.env.RENDER) ||
+                 (isCompiledBundle && distHtmlExists) ||
+                 (!isAiStudioSandbox && distHtmlExists);
+
   if (!isProd) {
+    // Dynamic import of Vite ensures production builds never crash on missing Vite dependencies
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
@@ -112,14 +179,7 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    // Resolve production static dist path with robust fallbacks
-    const candidatePaths = [
-      path.join(process.cwd(), 'dist'),
-      path.resolve(__dirname, 'dist'),
-      path.resolve(__dirname, '../dist')
-    ];
-    const distPath = candidatePaths.find(p => fs.existsSync(p)) || candidatePaths[0];
-
+    console.log(`[AgencyOps] Serving production static assets from: ${distPath}`);
     app.use(express.static(distPath, { index: false }));
 
     // Fallback handler for unmatched API routes in production
@@ -136,7 +196,7 @@ async function startServer() {
       if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
       } else {
-        res.status(500).send('Production build not found. Please run `npm run build`.');
+        res.status(500).send('Production build not found. Please ensure `npm run build` completed.');
       }
     });
   }
