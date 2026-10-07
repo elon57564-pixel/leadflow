@@ -5,7 +5,7 @@ import { WebsiteType, LeadChannel } from '../types';
 import { X, Plus, DollarSign, UserCheck, ShieldCheck } from 'lucide-react';
 
 export const NewClientLeadModal: React.FC = () => {
-  const { isNewLeadModalOpen, setIsNewLeadModalOpen, refreshProjects, showToast, t } = useApp();
+  const { isNewLeadModalOpen, setIsNewLeadModalOpen, refreshProjects, showToast, t, currentTenant, authToken } = useApp();
   
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
@@ -28,7 +28,10 @@ export const NewClientLeadModal: React.FC = () => {
     if (!clientName.trim()) return;
 
     setSubmitting(true);
+    const tenantId = currentTenant?.id || 'tenant-alm-nexus';
     const newProject = {
+      tenantId,
+      tenant_id: tenantId,
       clientName: clientName.trim(),
       clientEmail: clientEmail.trim() || undefined,
       clientCompany: clientCompany.trim() || undefined,
@@ -49,9 +52,16 @@ export const NewClientLeadModal: React.FC = () => {
     };
 
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'X-Tenant-Id': tenantId
+      };
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
       const res = await fetch('/api/projects', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(newProject)
       });
       if (res.ok) {

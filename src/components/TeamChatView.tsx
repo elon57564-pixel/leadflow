@@ -81,7 +81,11 @@ export const TeamChatView: React.FC = () => {
     const newMsgPayload = {
       channel: selectedChannel,
       sender: senderName,
+      senderName: senderName,
+      senderId: currentUser?.id || `user-${role}`,
+      senderRole: role,
       role: role,
+      content: inputText.trim(),
       text: inputText.trim(),
       timestamp: new Date().toISOString()
     };
@@ -102,12 +106,12 @@ export const TeamChatView: React.FC = () => {
         setInputText('');
       } else {
         // Optimistic append if server had issue but Firestore succeeded
-        setMessages(prev => [...prev, { id: 'msg_' + Date.now(), ...newMsgPayload }]);
+        setMessages(prev => [...prev, { id: 'msg_' + Date.now(), ...newMsgPayload } as any]);
         setInputText('');
       }
     } catch (e) {
       // Optimistic append
-      setMessages(prev => [...prev, { id: 'msg_' + Date.now(), ...newMsgPayload }]);
+      setMessages(prev => [...prev, { id: 'msg_' + Date.now(), ...newMsgPayload } as any]);
       setInputText('');
     }
   };
@@ -190,16 +194,19 @@ export const TeamChatView: React.FC = () => {
             </div>
           ) : (
             messages.map(msg => {
-              const isCurrentUser = msg.role === role;
+              const msgRole = msg.role || msg.senderRole || 'sales';
+              const msgSender = msg.sender || msg.senderName || 'Team Member';
+              const msgText = msg.text || msg.content || '';
+              const isCurrentUser = msgRole === role;
               return (
                 <div
                   key={msg.id}
                   className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}
                 >
                   <div className="flex items-center gap-2 mb-1 text-[11px] text-slate-400">
-                    <span className="font-bold text-slate-700 dark:text-slate-300">{msg.sender}</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{msgSender}</span>
                     <span className="text-[10px] uppercase font-mono px-1 rounded bg-slate-100 dark:bg-slate-800">
-                      {msg.role}
+                      {msgRole}
                     </span>
                     <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
@@ -210,7 +217,7 @@ export const TeamChatView: React.FC = () => {
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-xs'
                     }`}
                   >
-                    {msg.text}
+                    {msgText}
                   </div>
                 </div>
               );

@@ -251,7 +251,9 @@ Gross Profit Margin: ${grossMarginPercent.toFixed(1)}%`;
               {grossMarginPercent.toFixed(1)}%
             </span>
             {grossMarginPercent < 40 && (
-              <AlertTriangle className="w-4 h-4 text-rose-500 animate-pulse" title="Margin below agency standard benchmark (45%)" />
+              <span title="Margin below agency standard benchmark (45%)">
+                <AlertTriangle className="w-4 h-4 text-rose-500 animate-pulse" />
+              </span>
             )}
           </div>
           <span className="block text-[10px] opacity-80 mt-0.5">

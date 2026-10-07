@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 export const UnifiedInboxView: React.FC = () => {
-  const { t, showToast, projects, openClientPortal, aiSettings, setIsAISettingsModalOpen, setActiveTab } = useApp();
+  const { t, showToast, projects, openClientPortal, aiSettings, setIsAISettingsModalOpen, setActiveTab, updateProject, refreshProjects, currentTenant, authToken } = useApp();
 
   const [messages, setMessages] = useState<ClientCommunicationMessage[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<ClientCommunicationMessage | null>(null);
@@ -465,7 +465,7 @@ export const UnifiedInboxView: React.FC = () => {
                       }
                     : () => setShowSimulateModal(true)
                 }
-                variant="subtle"
+                variant="inbox"
               />
             ) : (
               filteredMessages.map(msg => {
@@ -711,7 +711,32 @@ export const UnifiedInboxView: React.FC = () => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={async () => {
+                        const matched = projects.find(p => p.id === selectedMessage.projectId || p.clientName.toLowerCase() === selectedMessage.clientName.toLowerCase());
+                        if (matched) {
+                          await updateProject(matched.id, { status: 'scoped' });
+                        } else {
+                          const res = await fetch('/api/projects', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'X-Tenant-Id': currentTenant?.id || 'tenant-alm-nexus',
+                              ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                            },
+                            body: JSON.stringify({
+                              clientName: selectedMessage.clientName,
+                              clientCompany: selectedMessage.clientCompany,
+                              clientEmail: selectedMessage.clientEmail,
+                              channel: selectedMessage.channel,
+                              websiteType: 'landing',
+                              purpose: selectedMessage.subject,
+                              status: 'scoped',
+                              estimatedPrice: 300,
+                              finalPrice: 300
+                            })
+                          });
+                          if (res.ok) await refreshProjects();
+                        }
                         showToast(`CRM Status for ${selectedMessage.clientName} updated to "Scoped"`, 'success');
                       }}
                       className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-indigo-600 text-[11px] font-bold transition cursor-pointer"
@@ -721,7 +746,16 @@ export const UnifiedInboxView: React.FC = () => {
 
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={async () => {
+                        const matched = projects.find(p => p.id === selectedMessage.projectId || p.clientName.toLowerCase() === selectedMessage.clientName.toLowerCase());
+                        if (matched) {
+                          await updateProject(matched.id, {
+                            advancePaid: true,
+                            advanceAmount: Number(((matched.finalPrice || 300) * 0.5).toFixed(2)),
+                            status: 'advance_paid',
+                            advanceTxId: `ADV-INB-${Date.now().toString().slice(-5)}`
+                          });
+                        }
                         showToast(`50% Advance invoice triggered for ${selectedMessage.clientName}`, 'success');
                       }}
                       className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 text-[11px] font-bold transition cursor-pointer"
@@ -731,7 +765,25 @@ export const UnifiedInboxView: React.FC = () => {
 
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={async () => {
+                        try {
+                          await fetch('/api/nudges/trigger', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'X-Tenant-Id': currentTenant?.id || 'tenant-alm-nexus',
+                              ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                            },
+                            body: JSON.stringify({
+                              clientName: selectedMessage.clientName,
+                              channel: selectedMessage.channel,
+                              clientEmail: selectedMessage.clientEmail,
+                              stage: 2
+                            })
+                          });
+                        } catch {
+                          // ignore error
+                        }
                         showToast(`Automated Stage 2 follow-up scheduled for ${selectedMessage.clientName}`, 'info');
                       }}
                       className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 text-[11px] font-bold transition cursor-pointer"

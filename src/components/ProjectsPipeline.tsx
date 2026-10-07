@@ -655,7 +655,7 @@ export const ProjectsPipeline: React.FC = () => {
           icon={Building2}
           title="No Authorized Deals Assigned"
           description="You do not currently have any active deal sheets or project scopes explicitly shared with your collaborator account. When an agency administrator authorizes a deal for your evaluation, it will appear here."
-          variant="subtle"
+          variant="generic"
         />
       )}
 
@@ -693,9 +693,9 @@ export const ProjectsPipeline: React.FC = () => {
       {/* Loading Skeleton */}
       {loadingProjects ? (
         viewMode === 'kanban' ? (
-          <SkeletonKanban columnsCount={5} cardsPerColumn={3} />
+          <SkeletonKanban columnsCount={5} cardsPerCol={3} />
         ) : (
-          <SkeletonTable rows={6} cols={8} />
+          <SkeletonTable rowsCount={6} colsCount={8} />
         )
       ) : filteredProjects.length === 0 && role !== 'collaborator' ? (
         <EmptyState

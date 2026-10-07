@@ -328,11 +328,14 @@ export interface ActiveTimerState {
 
 export interface ChatMessage {
   id: string;
-  senderId: string;
-  senderName: string;
-  senderRole: UserRole;
-  channel: 'general' | 'sales-leads' | 'staging-dev' | 'coordination';
-  content: string;
+  senderId?: string;
+  senderName?: string;
+  senderRole?: UserRole;
+  sender?: string;
+  role?: UserRole;
+  channel: 'general' | 'sales-leads' | 'staging-dev' | 'coordination' | string;
+  content?: string;
+  text?: string;
   timestamp: string;
   attachmentName?: string;
   attachmentUrl?: string;
@@ -450,14 +453,19 @@ export type OutreachFormat = 'linkedin_connect' | 'linkedin_inmail' | 'upwork_pr
 
 export interface AIOutreachRequest {
   channel: OutreachFormat;
-  leadName: string;
+  leadName?: string;
+  clientName?: string;
   companyName?: string;
+  clientCompany?: string;
   industry?: string;
   websiteType?: WebsiteType;
-  problemOrNeed: string;
+  problemOrNeed?: string;
   portfolioUrl?: string;
   valueHook?: string;
   tone?: 'consultative' | 'value_first' | 'urgent' | 'concise';
+  jobPostSnippet?: string;
+  jobPostTitle?: string;
+  customInstructions?: string;
 }
 
 export interface AIOutreachResponse {
@@ -538,7 +546,8 @@ export interface ClientFeedbackItem {
 export interface AnalyticsFilterState {
   dateRange: '7d' | '30d' | 'this_month' | 'quarter' | 'all';
   salesperson: string; // 'all' or specific name
-  tier: 'all' | 'tier1' | 'tier2' | 'tier3';
+  tier?: 'all' | 'tier1' | 'tier2' | 'tier3';
+  dealTier?: 'all' | 'tier1' | 'tier2' | 'tier3' | string;
 }
 
 export interface HeatmapCell {

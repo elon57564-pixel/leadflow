@@ -236,7 +236,7 @@ export interface FirebaseUserProfile {
 }
 
 export interface UserPreferences {
-  theme?: 'dark' | 'light';
+  theme?: 'dark' | 'light' | 'system';
   language?: string;
   currency?: string;
   scaleMode?: string;

@@ -43,7 +43,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
     unreadActivityCount,
     setIsActivityFeedOpen,
     setIsWikiModalOpen,
-    setIsPlatformHealthModalOpen
+    setIsPlatformHealthModalOpen,
+    setIsCommandPaletteOpen
   } = useApp();
 
   const tabTitles: Record<string, { title: string; subtitle: string }> = {
@@ -92,6 +93,17 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
       {/* Right: Quick Context Badges */}
       <div className="flex items-center gap-2 sm:gap-2.5">
         
+        {/* Global Command Palette Launcher (⌘K) */}
+        <button
+          onClick={() => setIsCommandPaletteOpen(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer text-xs"
+          title="Global Command Palette (Ctrl+K / ⌘K)"
+        >
+          <Search className="w-3.5 h-3.5 text-slate-400" />
+          <span className="hidden xl:inline text-[11px] text-slate-500 dark:text-slate-400">Search commands...</span>
+          <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-[9px] font-mono text-slate-500 font-bold">⌘K</kbd>
+        </button>
+
         {/* Global Wiki Button */}
         <button
           onClick={() => setIsWikiModalOpen(true)}

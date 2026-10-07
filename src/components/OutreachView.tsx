@@ -242,27 +242,32 @@ export const OutreachView: React.FC = () => {
   // Generate AI Outreach
   const handleGenerateOutreach = async () => {
     setIsGeneratingOutreach(true);
+    const clientName = outreachForm.leadName || outreachForm.clientName || 'Prospect';
+    const companyName = outreachForm.companyName || outreachForm.clientCompany || 'Company';
+    const postSnippet = outreachForm.jobPostSnippet || outreachForm.customInstructions || outreachForm.problemOrNeed || '';
+    const postTitle = outreachForm.jobPostTitle || outreachForm.problemOrNeed || 'Website Revamp';
+
     try {
       const result = await generateAI(
         {
           taskType: 'outreach',
-          clientName: outreachForm.clientName,
-          companyName: outreachForm.clientCompany,
+          clientName,
+          companyName,
           channel: outreachForm.channel,
           websiteType: outreachForm.websiteType,
-          leadSnippet: outreachForm.jobPostSnippet || outreachForm.customInstructions,
-          jobPostTitle: outreachForm.jobPostTitle
+          leadSnippet: postSnippet,
+          jobPostTitle: postTitle
         },
         aiSettings
       );
 
       setGeneratedOutreach({
         channel: outreachForm.channel,
-        connectionRequestSnippet: result.connectionRequestSnippet || `Hi ${outreachForm.clientName}, saw your project regarding ${outreachForm.websiteType || 'web development'}. Would love to connect and share relevant client case studies!`,
+        connectionRequestSnippet: result.connectionRequestSnippet || `Hi ${clientName}, saw your project regarding ${outreachForm.websiteType || 'web development'}. Would love to connect and share relevant client case studies!`,
         connectionCharCount: (result.connectionRequestSnippet || '').length,
         introductoryMessage: result.text,
-        followUpNudge: result.followUpNudge || `Hi ${outreachForm.clientName}, following up on my previous note. We have a dedicated staging slot reserved for next week—let me know if you'd like to inspect a demo!`,
-        recommendedSubject: result.suggestedSubject || `Web Development Proposal for ${outreachForm.clientCompany || outreachForm.clientName}`,
+        followUpNudge: result.followUpNudge || `Hi ${clientName}, following up on my previous note. We have a dedicated staging slot reserved for next week—let me know if you'd like to inspect a demo!`,
+        recommendedSubject: result.suggestedSubject || `Web Development Proposal for ${companyName}`,
         modelUsed: `${result.providerUsed} (${result.modelUsed})`
       });
 
@@ -275,11 +280,11 @@ export const OutreachView: React.FC = () => {
       console.warn('AI outreach generation failed, applying emergency fallback:', err);
       const fallback = generateOfflineFallback({
         taskType: 'outreach',
-        clientName: outreachForm.clientName,
-        companyName: outreachForm.clientCompany,
+        clientName,
+        companyName,
         channel: outreachForm.channel,
         websiteType: outreachForm.websiteType,
-        jobPostTitle: outreachForm.jobPostTitle
+        jobPostTitle: postTitle
       });
       setGeneratedOutreach({
         channel: outreachForm.channel,

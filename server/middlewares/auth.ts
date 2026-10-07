@@ -11,6 +11,8 @@ export interface TokenPayload {
   name: string;
   title: string;
   permissions: string[];
+  tenant_id?: string;
+  tenantId?: string;
   exp: number; // Unix timestamp in seconds
 }
 
@@ -101,6 +103,7 @@ export function verifyToken(token: string): TokenPayload | null {
 export function authenticateToken(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
+  const tenantFromHeader = (req.headers['x-tenant-id'] || req.headers['tenant-id'] || req.query.tenant_id || req.query.tenantId) as string;
 
   if (token) {
     const decoded = verifyToken(token);
@@ -108,6 +111,12 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
       req.user = decoded;
     }
   }
+
+  // Multi-tenant resolution: pass tenant_id across all request handlers
+  const resolvedTenantId = req.user?.tenant_id || req.user?.tenantId || tenantFromHeader || 'tenant-alm-nexus';
+  (req as any).tenant_id = resolvedTenantId;
+  (req as any).tenantId = resolvedTenantId;
+
   next();
 }
 
@@ -219,13 +228,17 @@ export function authenticateUser(identifier: string, passwordPlain: string, ipAd
     return { success: false, message: 'Incorrect password or PIN code.' };
   }
 
+  const tenantId = user.tenantId || user.tenant_id || 'tenant-alm-nexus';
+
   const token = signToken({
     id: user.id,
     email: user.email,
     role: user.role,
     name: user.name,
     title: user.title || `${user.role.toUpperCase()} Team Member`,
-    permissions: user.permissions || []
+    permissions: user.permissions || [],
+    tenant_id: tenantId,
+    tenantId: tenantId
   });
 
   const sanitizedUser = {
@@ -235,7 +248,9 @@ export function authenticateUser(identifier: string, passwordPlain: string, ipAd
     role: user.role,
     title: user.title || 'Team Member',
     avatar: user.avatar,
-    permissions: user.permissions || []
+    permissions: user.permissions || [],
+    tenantId: tenantId,
+    tenant_id: tenantId
   };
 
   logAuditAction({
@@ -304,13 +319,17 @@ export function registerNewUser(data: { name: string; email: string; password: s
     ipAddress: ipAddress || '127.0.0.1'
   });
 
+  const userTenantId = (data as any).tenantId || (data as any).tenant_id || 'tenant-alm-nexus';
+
   const token = signToken({
     id: newUser.id,
     email: newUser.email,
     role: newUser.role,
     name: newUser.name,
     title: newUser.title,
-    permissions: newUser.permissions
+    permissions: newUser.permissions,
+    tenant_id: userTenantId,
+    tenantId: userTenantId
   });
 
   const sanitized = {
@@ -320,7 +339,9 @@ export function registerNewUser(data: { name: string; email: string; password: s
     role: newUser.role,
     title: newUser.title,
     avatar: newUser.avatar,
-    permissions: newUser.permissions
+    permissions: newUser.permissions,
+    tenantId: userTenantId,
+    tenant_id: userTenantId
   };
 
   return {

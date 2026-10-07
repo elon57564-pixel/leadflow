@@ -37,6 +37,30 @@ export interface SyncStatusEvent {
 
 const QUEUE_STORAGE_KEY = 'agencyops_offline_sync_queue';
 const LAST_SYNC_KEY = 'agencyops_last_sync_timestamp';
+const IDB_DATABASE_NAME = 'leadflow_offline_sync_db';
+const IDB_STORE_NAME = 'mutations';
+
+// IndexedDB Helper with graceful fallback
+function getIndexedDB(): Promise<IDBDatabase | null> {
+  if (typeof window === 'undefined' || !('indexedDB' in window)) {
+    return Promise.resolve(null);
+  }
+  return new Promise((resolve) => {
+    try {
+      const req = window.indexedDB.open(IDB_DATABASE_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(IDB_STORE_NAME)) {
+          db.createObjectStore(IDB_STORE_NAME, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
+  });
+}
 
 class OfflineSyncService {
   private queue: QueuedMutation[] = [];
@@ -54,13 +78,35 @@ class OfflineSyncService {
     }
   }
 
-  // Load existing mutations from persistent storage
-  private loadQueue() {
+  // Load existing mutations from persistent storage (IndexedDB with LocalStorage fallback)
+  private async loadQueue() {
     if (typeof window === 'undefined') return;
+
+    // 1. First attempt loading from IndexedDB
+    try {
+      const db = await getIndexedDB();
+      if (db) {
+        const tx = db.transaction(IDB_STORE_NAME, 'readonly');
+        const store = tx.objectStore(IDB_STORE_NAME);
+        const req = store.getAll();
+        req.onsuccess = () => {
+          if (Array.isArray(req.result) && req.result.length > 0) {
+            this.queue = req.result;
+            this.notify();
+            return;
+          }
+        };
+      }
+    } catch (idbErr) {
+      console.warn('[OfflineSync] IndexedDB read fallback to localStorage:', idbErr);
+    }
+
+    // 2. Fallback to LocalStorage
     try {
       const saved = localStorage.getItem(QUEUE_STORAGE_KEY);
       if (saved) {
         this.queue = JSON.parse(saved);
+        this.notify();
       }
     } catch (err) {
       console.warn('[OfflineSync] Failed to load queue from localStorage:', err);
@@ -68,13 +114,30 @@ class OfflineSyncService {
     }
   }
 
-  // Save mutations to persistent storage
-  private saveQueue() {
+  // Save mutations to persistent storage (both IndexedDB and LocalStorage for dual resilience)
+  private async saveQueue() {
     if (typeof window === 'undefined') return;
+
+    // 1. Dual-write to LocalStorage
     try {
       localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(this.queue));
     } catch (err) {
       console.warn('[OfflineSync] Failed to save queue to localStorage:', err);
+    }
+
+    // 2. Dual-write to IndexedDB
+    try {
+      const db = await getIndexedDB();
+      if (db) {
+        const tx = db.transaction(IDB_STORE_NAME, 'readwrite');
+        const store = tx.objectStore(IDB_STORE_NAME);
+        store.clear();
+        for (const item of this.queue) {
+          store.put(item);
+        }
+      }
+    } catch (idbErr) {
+      // Non-fatal, localStorage already has the record
     }
   }
 
@@ -128,6 +191,12 @@ class OfflineSyncService {
     localVersion: number = 1
   ): string {
     const id = `mut_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const activeTenantId = (typeof window !== 'undefined' ? localStorage.getItem('alm_nexus_tenant_id') : null) || 'tenant-alm-nexus';
+    const enrichedPayload = {
+      tenant_id: activeTenantId,
+      tenantId: activeTenantId,
+      ...payload
+    };
     
     // Coalesce updates if an existing pending update exists for the same target
     const existingIdx = this.queue.findIndex(
@@ -137,7 +206,7 @@ class OfflineSyncService {
     if (existingIdx !== -1 && action === 'update') {
       this.queue[existingIdx] = {
         ...this.queue[existingIdx],
-        payload: { ...this.queue[existingIdx].payload, ...payload },
+        payload: { ...this.queue[existingIdx].payload, ...enrichedPayload },
         timestamp: Date.now(),
         localVersion: (this.queue[existingIdx].localVersion || 1) + 1
       };
@@ -147,7 +216,7 @@ class OfflineSyncService {
         entity,
         action,
         targetId,
-        payload,
+        payload: enrichedPayload,
         timestamp: Date.now(),
         localVersion,
         retryCount: 0,
@@ -290,8 +359,10 @@ class OfflineSyncService {
     const remainingQueue: QueuedMutation[] = [];
 
     const token = typeof window !== 'undefined' ? localStorage.getItem('alm_nexus_token') : null;
+    const activeTenantId = (typeof window !== 'undefined' ? localStorage.getItem('alm_nexus_tenant_id') : null) || 'tenant-alm-nexus';
     const authHeaders: Record<string, string> = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-Tenant-Id': activeTenantId
     };
     if (token) {
       authHeaders['Authorization'] = `Bearer ${token}`;
@@ -318,6 +389,12 @@ class OfflineSyncService {
           method = 'POST';
         } else if (mutation.entity === 'invoice') {
           endpoint = `/api/invoices`;
+          method = 'POST';
+        } else if (mutation.entity === 'chat') {
+          endpoint = `/api/chat/messages`;
+          method = 'POST';
+        } else if (mutation.entity === 'commission') {
+          endpoint = `/api/commissions/payout`;
           method = 'POST';
         }
 

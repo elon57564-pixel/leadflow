@@ -438,9 +438,13 @@ inboxRouter.get('/messages', (req: Request, res: Response) => {
   const channel = typeof req.query.channel === 'string' ? req.query.channel : '';
   const status = typeof req.query.status === 'string' ? req.query.status : '';
   const search = typeof req.query.search === 'string' ? req.query.search.toLowerCase() : '';
+  const tenantId = (req as any).tenant_id || (req.query.tenant_id as string) || (req.query.tenantId as string);
 
   let messages = (db as any).clientInquiries || [];
 
+  if (tenantId && tenantId !== 'all') {
+    messages = messages.filter((m: any) => !m.tenantId || m.tenantId === tenantId || m.tenant_id === tenantId);
+  }
   if (channel && channel !== 'all') {
     messages = messages.filter((m: any) => m.channel === channel);
   }
@@ -482,8 +486,11 @@ inboxRouter.post('/messages', (req: Request, res: Response) => {
   }
 
   const newId = `inbox-${Date.now()}`;
+  const targetTenantId = body.tenantId || body.tenant_id || (req as any).tenant_id || 'tenant-alm-nexus';
   const newMessage = {
     id: newId,
+    tenantId: targetTenantId,
+    tenant_id: targetTenantId,
     clientName: body.clientName,
     clientEmail: body.clientEmail || `${body.clientName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@example.com`,
     clientCompany: body.clientCompany || 'Prospective Client',

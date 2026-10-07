@@ -55,13 +55,19 @@ process.on('uncaughtException', (error) => {
 const app = express();
 
 // Detect AI Studio container preview environment vs external hosting platforms (Railway, Render, Cloud Run, etc.)
-const isAiStudioSandbox = Boolean(process.env.APPLET_ID || process.env.DEFAULT_APP_PORT);
+const isRailwayOrExternal = Boolean(
+  process.env.RAILWAY_ENVIRONMENT ||
+  process.env.RAILWAY_SERVICE_ID ||
+  process.env.RAILWAY_STATIC_URL ||
+  process.env.RENDER ||
+  (!process.env.APPLET_ID && process.env.PORT)
+);
 
-// In AI Studio preview environment, Node dev server must listen on port 3000 (reverse proxied by container nginx on 8080).
-// In external platforms like Railway, Render, or Docker, read PORT from process.env.PORT (e.g., 8080 or dynamic port).
-const PORT: number = isAiStudioSandbox
-  ? Number(process.env.DEFAULT_APP_PORT || 3000)
-  : (process.env.PORT ? parseInt(process.env.PORT, 10) : 3000);
+// In external platforms like Railway, Render, or Docker, strictly read PORT from process.env.PORT (e.g., 8080 or dynamic port).
+// In AI Studio preview environment, Node dev server listens on port 3000.
+const PORT: number = isRailwayOrExternal
+  ? (process.env.PORT ? parseInt(process.env.PORT, 10) : 3000)
+  : 3000;
 
 // Global Middlewares
 app.use(express.json({ limit: '25mb' }));
@@ -69,15 +75,18 @@ app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(authenticateToken);
 
 // Health check endpoint for Railway, Render, Kubernetes, and load balancers
-app.get('/health', (req: Request, res: Response) => {
+const handleHealthCheck = (req: Request, res: Response) => {
   res.status(200).json({
     status: 'ok',
     uptime: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
     port: PORT,
-    platform: process.env.RAILWAY_ENVIRONMENT ? 'railway' : (isAiStudioSandbox ? 'ai-studio' : 'standalone')
+    platform: process.env.RAILWAY_ENVIRONMENT ? 'railway' : (isRailwayOrExternal ? 'external-cloud' : 'ai-studio')
   });
-});
+};
+
+app.get('/health', handleHealthCheck);
+app.get('/api/health', handleHealthCheck);
 
 // ==========================================
 // MOUNT MODULAR API ROUTERS
@@ -165,7 +174,7 @@ async function startServer() {
   const isProd = process.env.NODE_ENV === 'production' ||
                  Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_ID || process.env.RAILWAY_STATIC_URL || process.env.RENDER) ||
                  (isCompiledBundle && distHtmlExists) ||
-                 (!isAiStudioSandbox && distHtmlExists);
+                 (isRailwayOrExternal && distHtmlExists);
 
   if (!isProd) {
     // Dynamic import of Vite ensures production builds never crash on missing Vite dependencies

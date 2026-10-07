@@ -29,6 +29,7 @@ export const DashboardAnalytics: React.FC = () => {
   const [filters, setFilters] = useState<AnalyticsFilterState>({
     dateRange: 'all',
     salesperson: 'all',
+    tier: 'all',
     dealTier: 'all'
   });
 

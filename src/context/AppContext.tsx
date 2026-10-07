@@ -132,6 +132,9 @@ interface AppContextType {
   formatMoney: (amount: number, overrideCurr?: SupportedCurrency) => string;
   scaleMode: AgencyScaleMode;
   setScaleMode: (mode: AgencyScaleMode) => Promise<void>;
+  // Global Command Palette (⌘K)
+  isCommandPaletteOpen: boolean;
+  setIsCommandPaletteOpen: (open: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -321,6 +324,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isNewLeadModalOpen, setIsNewLeadModalOpen] = useState(false);
   const [discordExportModalData, setDiscordExportModalData] = useState<ProjectLead | null>(null);
   const [automatedTestsPassedCount, setAutomatedTestsPassedCount] = useState<number>(17);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   // Load Tenants from API
   const refreshTenants = async () => {
@@ -350,6 +354,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         localStorage.setItem('alm_nexus_tenant_id', target.id);
       }
       showToast(`Switched active workspace to "${target.name}"`, 'info');
+      refreshProjects();
       refreshActivityFeed();
       refreshWikiDocs();
       refreshDepartmentalProgress();
@@ -759,7 +764,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
 
       // 2. Query the server API
-      const headers: Record<string, string> = {};
+      const headers: Record<string, string> = {
+        'X-Tenant-Id': currentTenant?.id || (typeof window !== 'undefined' ? localStorage.getItem('alm_nexus_tenant_id') : null) || 'tenant-alm-nexus'
+      };
       const token = authToken || (typeof window !== 'undefined' ? localStorage.getItem('alm_nexus_token') : null);
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -837,9 +844,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
 
       // 4. Send to backend REST API
+      const reqHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'X-Tenant-Id': currentTenant?.id || 'tenant-alm-nexus'
+      };
+      if (authToken) {
+        reqHeaders['Authorization'] = `Bearer ${authToken}`;
+      }
       const res = await fetch(`/api/projects/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: reqHeaders,
         body: JSON.stringify(updates)
       });
       if (res.ok) {
@@ -866,8 +880,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Transfer project strictly enforcing SOP Rule 8
   const transferProject = async (id: string): Promise<{ success: boolean; message: string }> => {
     try {
+      const transferHeaders: Record<string, string> = {
+        'X-Tenant-Id': currentTenant?.id || 'tenant-alm-nexus'
+      };
+      if (authToken) {
+        transferHeaders['Authorization'] = `Bearer ${authToken}`;
+      }
       const res = await fetch(`/api/projects/${id}/transfer`, {
-        method: 'POST'
+        method: 'POST',
+        headers: transferHeaders
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -1029,7 +1050,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setCurrency,
         formatMoney,
         scaleMode,
-        setScaleMode
+        setScaleMode,
+        isCommandPaletteOpen,
+        setIsCommandPaletteOpen
       }}
     >
       {children}

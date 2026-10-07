@@ -44,6 +44,8 @@ import { RoleLoginView } from './components/RoleLoginView';
 import { RoleRouteGuard } from './components/RoleRouteGuard';
 import { OfflineSyncBanner } from './components/OfflineSyncBanner';
 import { LeadFlowLandingView } from './components/LeadFlowLandingView';
+import { GlobalCommandPalette } from './components/GlobalCommandPalette';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { X } from 'lucide-react';
 
 const AppContent: React.FC = () => {
@@ -61,6 +63,8 @@ const AppContent: React.FC = () => {
     setIsWikiModalOpen,
     isPlatformHealthModalOpen,
     setIsPlatformHealthModalOpen,
+    isCommandPaletteOpen,
+    setIsCommandPaletteOpen,
     toasts,
     dismissToast,
     projects,
@@ -72,6 +76,18 @@ const AppContent: React.FC = () => {
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+
+  // Global Keyboard Navigation (⌘K / Ctrl+K Command Palette)
+  React.useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(!isCommandPaletteOpen);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [isCommandPaletteOpen, setIsCommandPaletteOpen]);
 
   // When not authenticated, display the full LeadFlow Agency experience by default,
   // allowing visitors to explore features, calculate ROI, test free tools, book a call,
@@ -101,6 +117,10 @@ const AppContent: React.FC = () => {
           </div>
         )}
 
+        <GlobalCommandPalette
+          isOpen={isCommandPaletteOpen}
+          onClose={() => setIsCommandPaletteOpen(false)}
+        />
         <TenantOnboardingModal
           isOpen={isOnboardingModalOpen}
           onClose={() => setIsOnboardingModalOpen(false)}
@@ -303,6 +323,10 @@ const AppContent: React.FC = () => {
       </div>
 
       {/* Global Modals */}
+      <GlobalCommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+      />
       <OfflineSyncBanner />
       <NewClientLeadModal />
       <AIAssistantModal />
@@ -342,9 +366,11 @@ const AppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </ErrorBoundary>
   );
 };
 

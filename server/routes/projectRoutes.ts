@@ -65,6 +65,12 @@ projectRouter.get('/', (req: Request, res: Response) => {
     }
   }
 
+  // Strict Multi-Tenant Isolation
+  const reqTenantId = (req as any).tenant_id || (req.query.tenant_id as string) || (req.query.tenantId as string);
+  if (reqTenantId && reqTenantId !== 'all') {
+    projects = projects.filter((p: any) => !p.tenantId || p.tenantId === reqTenantId || p.tenant_id === reqTenantId);
+  }
+
   if (status && status !== 'all') {
     projects = projects.filter(p => p.status === status);
   }
@@ -107,8 +113,11 @@ projectRouter.post('/', (req: Request, res: Response) => {
   const finalPrice = Number(body.finalPrice) || estPrice;
   const commissionAmount = Number(((finalPrice * rate) / 100).toFixed(2));
 
+  const targetTenantId = body.tenantId || body.tenant_id || (req as any).tenant_id || 'tenant-alm-nexus';
   const newProject = {
-    id: `proj-${Date.now()}`,
+    id: body.id || `proj-${Date.now()}`,
+    tenantId: targetTenantId,
+    tenant_id: targetTenantId,
     clientName: body.clientName,
     clientEmail: body.clientEmail || '',
     clientPhone: body.clientPhone || '',
