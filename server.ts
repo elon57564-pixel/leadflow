@@ -19,6 +19,16 @@ const appDirname = appFilename ? path.dirname(appFilename) : process.cwd();
 // Database & Persistence initialization
 import { initPostgresPool, readDB, writeDB, INITIAL_DB } from './server/db';
 
+// Logger & Security Pipeline
+import { requestCorrelationMiddleware, logger } from './server/logger';
+import {
+  securityHeaders,
+  dynamicCors,
+  globalRateLimiter,
+  compressionMiddleware,
+  parseCookies
+} from './server/middlewares/security';
+
 // Middlewares
 import { authenticateToken } from './server/middlewares/auth';
 
@@ -41,18 +51,29 @@ import {
   generalRouter
 } from './server/routes/databaseRoutes';
 
+// Upgraded Functional Engine Handlers
+import { eventsRouter } from './server/services/realtimeEngine';
+import { contractRouter } from './server/services/contractPdfEngine';
+import { universalWebhookRouter } from './server/services/universalWebhookEngine';
+import { rateCardRouter } from './server/services/rateCardEngine';
+import { offlineSyncRouter } from './server/routes/offlineSyncRoutes';
+import { emailRouter } from './server/services/emailEngine';
+
 dotenv.config();
 
 // Global crash resilience for production deployments
 process.on('unhandledRejection', (reason, promise) => {
-  console.warn('[Server] Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.warn(`Unhandled Rejection at: ${promise}`, { details: String(reason) });
 });
 
 process.on('uncaughtException', (error) => {
-  console.error('[Server] Uncaught Exception:', error);
+  logger.error(`Uncaught Exception: ${error.message}`, { details: error.stack });
 });
 
 const app = express();
+
+// Trust reverse proxies (Cloud Run, Container Nginx, Railway) for express-rate-limit and X-Forwarded-For IP resolution
+app.set('trust proxy', 1);
 
 // Detect AI Studio container preview environment vs external hosting platforms (Railway, Render, Cloud Run, etc.)
 const isRailwayOrExternal = Boolean(
@@ -69,32 +90,67 @@ const PORT: number = isRailwayOrExternal
   ? (process.env.PORT ? parseInt(process.env.PORT, 10) : 3000)
   : 3000;
 
-// Global Middlewares
+// Global Middleware Pipeline
+app.use(securityHeaders);
+app.use(dynamicCors);
+app.use(parseCookies);
+app.use(compressionMiddleware);
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
+app.use(requestCorrelationMiddleware);
 app.use(authenticateToken);
 
-// Health check endpoint for Railway, Render, Kubernetes, and load balancers
+// Health & Observability Check Endpoints (Railway, Kubernetes & Load Balancers)
 const handleHealthCheck = (req: Request, res: Response) => {
+  const mem = process.memoryUsage();
   res.status(200).json({
     status: 'ok',
     uptime: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
     port: PORT,
-    platform: process.env.RAILWAY_ENVIRONMENT ? 'railway' : (isRailwayOrExternal ? 'external-cloud' : 'ai-studio')
+    platform: process.env.RAILWAY_ENVIRONMENT ? 'railway' : (isRailwayOrExternal ? 'external-cloud' : 'ai-studio'),
+    memory: {
+      rssMb: Math.round(mem.rss / 1024 / 1024),
+      heapTotalMb: Math.round(mem.heapTotal / 1024 / 1024),
+      heapUsedMb: Math.round(mem.heapUsed / 1024 / 1024)
+    }
   });
 };
 
 app.get('/health', handleHealthCheck);
+app.get('/healthz', handleHealthCheck);
+app.get('/readyz', handleHealthCheck);
+app.get('/livez', handleHealthCheck);
 app.get('/api/health', handleHealthCheck);
+
+// Apply rate limiting to API routes
+app.use('/api/', globalRateLimiter);
 
 // ==========================================
 // MOUNT MODULAR API ROUTERS
 // ==========================================
 
-// Authentication & Users
+// Authentication & Tenants
 app.use('/api/auth', authRoutes);
 app.use('/api/tenants', tenantRouter);
+
+// Real-Time Event Streaming & Server-Sent Events (SSE)
+app.use('/api/events', eventsRouter);
+
+// Dynamic Contracts & Document Generation
+app.use('/api/contracts', contractRouter);
+
+// Server-Side Rate Card & Commission Matrix Engine
+app.use('/api/rate-card', rateCardRouter);
+
+// Offline-First Conflict-Free Batched Sync
+app.use('/api/offline', offlineSyncRouter);
+
+// Transactional Email & Notifications Engine
+app.use('/api/email', emailRouter);
+
+// Universal Webhooks Subscription Engine
+app.use('/api/webhooks/v2', universalWebhookRouter);
 
 // Projects, SOP Transfer Gate, Collaborators, & Leads Scoring
 app.use('/api/projects', projectRouter);
@@ -210,9 +266,30 @@ async function startServer() {
     });
   }
 
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log(`[AgencyOps] Server listening on port ${PORT} at http://0.0.0.0:${PORT} (${isProd ? 'Production' : 'Development'})`);
+  const httpServer = server.listen(PORT, '0.0.0.0', () => {
+    logger.info(`[AgencyOps] Server listening on port ${PORT} at http://0.0.0.0:${PORT} (${isProd ? 'Production' : 'Development'})`, {
+      context: 'ServerBootstrap',
+      durationMs: 0
+    });
   });
+
+  // Graceful Shutdown Handlers for Railway, Render & Container Lifecycles
+  const handleShutdown = (signal: string) => {
+    logger.info(`Received ${signal}. Initiating graceful shutdown...`, { context: 'GracefulShutdown' });
+    httpServer.close(() => {
+      logger.info('HTTP server closed. Exiting process cleanly.', { context: 'GracefulShutdown' });
+      process.exit(0);
+    });
+
+    // Force exit if connections don't drain within 10s
+    setTimeout(() => {
+      logger.warn('Forcing process termination after 10s timeout.', { context: 'GracefulShutdown' });
+      process.exit(1);
+    }, 10000);
+  };
+
+  process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+  process.on('SIGINT', () => handleShutdown('SIGINT'));
 }
 
 startServer();

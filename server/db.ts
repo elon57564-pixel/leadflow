@@ -5,6 +5,25 @@ import pg from 'pg';
 
 const { Pool } = pg;
 
+export function calculateCommission(projectValue: number, hasHighPerformanceTier = false) {
+  let percentage = 25;
+  let tierName = 'Standard Tier (≤ $300)';
+
+  if (projectValue <= 300) {
+    percentage = hasHighPerformanceTier ? 40 : 25;
+    tierName = hasHighPerformanceTier ? 'High Performer Tier (40%)' : 'Tier 1: ≤ $300 (25%)';
+  } else if (projectValue <= 700) {
+    percentage = hasHighPerformanceTier ? 42 : 30;
+    tierName = hasHighPerformanceTier ? 'High Performer Tier (42%)' : 'Tier 2: $300 – $700 (30%)';
+  } else {
+    percentage = hasHighPerformanceTier ? 45 : 35;
+    tierName = hasHighPerformanceTier ? 'High Performer Tier (45%)' : 'Tier 3: > $700 (35%)';
+  }
+
+  const amount = Number(((projectValue * percentage) / 100).toFixed(2));
+  return { percentage, amount, tierName, tier: tierName };
+}
+
 export interface DatabaseStatus {
   engine: 'postgresql' | 'local_disk_json';
   connected: boolean;

@@ -1475,6 +1475,23 @@
   ],
   "auditLogs": [
     {
+      "id": "audit_1791404547380_djtve",
+      "timestamp": "2026-10-07T20:22:27.380Z",
+      "tenantId": "tenant-alm-nexus",
+      "actorId": "sales-user",
+      "actorName": "Sales Director",
+      "actorRole": "sales",
+      "action": "CONTRACT_GENERATED",
+      "entityType": "project",
+      "entityId": "contract_1791404547375",
+      "ipAddress": "127.0.0.1",
+      "details": {
+        "clientName": "Alexander Vance",
+        "websiteType": "ecommerce",
+        "agreedPrice": 750
+      }
+    },
+    {
       "id": "audit-1790527803386-4eaa9f",
       "userId": "user-nova-labs-interactive-ceo-3383",
       "userName": "Zayd Malik",
