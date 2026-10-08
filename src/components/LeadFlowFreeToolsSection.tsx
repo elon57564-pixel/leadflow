@@ -154,7 +154,7 @@ Marcus`);
         lineStatus: data.lineStatus || 'Direct Dial & Mobile Carrier Active',
         provider: data.provider
       });
-      showToast(`Domain analyzed! Verified email pattern found via ${data.provider || 'Hunter/Apollo engine'}`, 'success');
+      showToast(`Domain analyzed! Verified pattern found via ${data.provider || 'Self-Built Scraper & MX Engine'}`, 'success');
     } catch (err: any) {
       showToast(err?.message || 'Error communicating with Email Finder API', 'error');
     } finally {
