@@ -28,17 +28,22 @@ export const LeadFlowFreeToolsSection: React.FC<{ onBookCall?: () => void }> = (
   const [targetRole, setTargetRole] = useState('VP of Sales');
   const [findingEmail, setFindingEmail] = useState(false);
   const [emailResult, setEmailResult] = useState<{
+    pattern?: string;
     patterns: string[];
     sampleEmail: string;
     mxStatus: string;
     deliverabilityConfidence: number;
     phoneFormat: string;
+    lineStatus?: string;
+    provider?: string;
   } | null>({
+    pattern: '{first}.{last}@stripe.com',
     patterns: ['{first}.{last}@stripe.com', '{f}{last}@stripe.com', '{first}@stripe.com'],
     sampleEmail: 'v.patel@stripe.com',
     mxStatus: 'Google Workspace Enterprise (Verified MX Records)',
     deliverabilityConfidence: 98,
-    phoneFormat: '+1 (415) 890-XXXX (Direct Dial Available)'
+    phoneFormat: '+1 (415) 890-XXXX (Direct Dial Available)',
+    lineStatus: 'Direct Dial & Mobile Carrier Active'
   });
 
   // 2. Spam Checker State
@@ -75,6 +80,7 @@ Marcus`);
   });
 
   // 3. LinkedIn Hook Optimizer State
+  const [targetPersona, setTargetPersona] = useState('VP of Sales / B2B Founders');
   const [hookTopic, setHookTopic] = useState('Why cold calling is dead and multi-channel outbound is winning in 2026');
   const [generatingHook, setGeneratingHook] = useState(false);
   const [hooksList, setHooksList] = useState<string[]>([
@@ -107,64 +113,140 @@ Marcus`);
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const handleRunEmailFinder = () => {
+  // Endpoint 1: Email & Mobile Finder Integration
+  const handleRunEmailFinder = async () => {
+    const cleanDomain = targetDomain.trim();
+    if (!cleanDomain) {
+      showToast('Please enter a target company domain (e.g. stripe.com)', 'error');
+      return;
+    }
     setFindingEmail(true);
-    setTimeout(() => {
-      setFindingEmail(false);
-      const cleanDomain = targetDomain.trim().toLowerCase().replace(/https?:\/\//, '').replace(/\/.*$/, '') || 'company.com';
+    try {
+      const res = await fetch('/api/gtm/email-finder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyDomain: cleanDomain,
+          personaTitle: targetRole.trim() || 'VP of Sales'
+        })
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || `HTTP ${res.status}: Failed to analyze domain`);
+      }
+      const data = json.data;
       setEmailResult({
-        patterns: [`{first}.{last}@${cleanDomain}`, `{f}{last}@${cleanDomain}`, `{first}@${cleanDomain}`],
-        sampleEmail: `alex.rivers@${cleanDomain}`,
-        mxStatus: 'Active Mail Exchange & Catch-All Resolved',
-        deliverabilityConfidence: 96,
-        phoneFormat: '+1 (555) 720-XXXX (Waterfall Verified Mobile)'
+        pattern: data.pattern || (data.patterns && data.patterns[0]) || `{first}.{last}@${cleanDomain}`,
+        patterns: Array.isArray(data.patterns) && data.patterns.length > 0 ? data.patterns : [data.pattern],
+        sampleEmail: data.sampleEmail || `alex.rivers@${cleanDomain}`,
+        mxStatus: data.mxStatus || 'Active Mail Exchange & Catch-All Resolved',
+        deliverabilityConfidence: data.deliverabilityConfidence ?? 96,
+        phoneFormat: data.phoneFormat || '+1 (555) 720-XXXX (Waterfall Verified Mobile)',
+        lineStatus: data.lineStatus || 'Direct Dial & Mobile Carrier Active',
+        provider: data.provider
       });
-      showToast('Domain analyzed & verified email patterns found!', 'success');
-    }, 600);
+      showToast(`Domain analyzed! Verified email pattern found via ${data.provider || 'Hunter/Apollo engine'}`, 'success');
+    } catch (err: any) {
+      showToast(err?.message || 'Error communicating with Email Finder API', 'error');
+    } finally {
+      setFindingEmail(false);
+    }
   };
 
-  const handleRunSpamCheck = () => {
+  // Endpoint 2: Spam Checker Integration (OpenAI gpt-4o-mini / Gemini)
+  const handleRunSpamCheck = async () => {
+    if (!emailBody.trim()) {
+      showToast('Please enter email body copy to check deliverability', 'error');
+      return;
+    }
     setAnalyzingSpam(true);
-    setTimeout(() => {
-      setAnalyzingSpam(false);
-      const text = `${emailSubject} ${emailBody}`.toLowerCase();
-      const riskyWords = ['free', 'guarantee', 'urgent', 'buy now', 'act fast', '100% free', 'make money', 'cash'];
-      const found = riskyWords.filter(w => text.includes(w));
-      const words = emailBody.trim().split(/\s+/).length;
-      const score = Math.max(50, 100 - (found.length * 15) - (words > 120 ? 15 : 0));
-      const grade = score >= 90 ? 'A+' : score >= 80 ? 'B' : score >= 65 ? 'C' : 'Risky';
-      
-      const recs = [];
-      if (words > 120) recs.push('Body length exceeds 120 words. Consider shortening for executive attention.');
-      else recs.push('Word count is lean and high-converting (under 100 words).');
-      if (found.length > 0) recs.push(`Remove risky sales buzzwords: "${found.join(', ')}".`);
-      else recs.push('Zero high-risk spam keywords detected.');
-      recs.push('Ensure SPF, DKIM, and DMARC are configured on your secondary sending domain.');
-
-      setSpamScore({
-        score,
-        grade,
-        wordCount: words,
-        readingTimeSec: Math.round(words / 3.5),
-        flaggedWords: found,
-        recommendations: recs
+    try {
+      const res = await fetch('/api/gtm/spam-checker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emailCopy: emailBody,
+          subject: emailSubject
+        })
       });
-      showToast('Spam analysis complete! Deliverability Score: ' + score + '/100', 'info');
-    }, 500);
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || `HTTP ${res.status}: Failed to analyze spam deliverability`);
+      }
+      const data = json.data;
+      setSpamScore({
+        score: data.deliverabilityScore ?? data.score ?? 90,
+        grade: data.grade || 'A+',
+        wordCount: data.wordCount || emailBody.trim().split(/\s+/).length,
+        readingTimeSec: data.readingTimeSec || Math.round(emailBody.trim().split(/\s+/).length / 3.5),
+        flaggedWords: Array.isArray(data.spamTriggerWords) ? data.spamTriggerWords : (data.flaggedWords || []),
+        recommendations: Array.isArray(data.improvementSuggestions) ? data.improvementSuggestions : (data.recommendations || [])
+      });
+      showToast(`Spam analysis complete! Deliverability Score: ${data.deliverabilityScore ?? data.score}/100`, 'info');
+    } catch (err: any) {
+      showToast(err?.message || 'Error communicating with Spam Checker API', 'error');
+    } finally {
+      setAnalyzingSpam(false);
+    }
   };
 
-  const handleRunHookGenerator = () => {
+  // Endpoint 3: Hook Generator Integration (OpenAI gpt-4o-mini / Gemini)
+  const handleRunHookGenerator = async () => {
+    const angle = hookTopic.trim();
+    if (!angle) {
+      showToast('Please enter your offer, angle, or insight', 'error');
+      return;
+    }
     setGeneratingHook(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/gtm/hook-generator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetPersona: targetPersona.trim() || 'VP of Sales',
+          valueProp: angle,
+          hookTopic: angle
+        })
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || `HTTP ${res.status}: Failed to generate hooks`);
+      }
+      const data = json.data;
+      if (Array.isArray(data.hooks) && data.hooks.length > 0) {
+        setHooksList(data.hooks);
+        showToast(`Generated 3 conversational LinkedIn hooks via ${data.provider || 'AI Engine'}!`, 'success');
+      } else {
+        throw new Error('No hooks returned from API');
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'Error communicating with Hook Generator API', 'error');
+    } finally {
       setGeneratingHook(false);
-      const topic = hookTopic.trim() || 'B2B Sales';
-      setHooksList([
-        `92% of B2B teams are making this critical mistake with ${topic}.\n\nHere is what the top 1% do instead to book 15+ meetings/month: 👇`,
-        `Unpopular opinion on ${topic}:\n\nThe old playbook doesn't work anymore. If you want qualified pipeline in 2026, here is the new framework:`,
-        `We analyzed 50,000 cold outreach messages about ${topic}.\n\nThis single 2-line framework had an 8.4% meeting booking rate:`
-      ]);
-      showToast('Generated 3 viral LinkedIn outbound hooks!', 'success');
-    }, 600);
+    }
+  };
+
+  // Intent Scanner Integration
+  const handleRunIntentScanner = async () => {
+    setScanningIntent(true);
+    try {
+      const res = await fetch('/api/gtm/intent-scanner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetMarket: intentCompany
+        })
+      });
+      const json = await res.json();
+      if (res.ok && json.success && json.data) {
+        setIntentResults(json.data);
+        showToast('Live ICP intent signals refreshed from market intelligence!', 'success');
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'Error scanning intent signals', 'error');
+    } finally {
+      setScanningIntent(false);
+    }
   };
 
   return (
@@ -278,6 +360,9 @@ Marcus`);
                 <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                   <span>Primary Verified Email Pattern:</span>
+                  <span className="font-mono px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-[11px]">
+                    {emailResult.pattern || emailResult.patterns?.[0]}
+                  </span>
                 </span>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-bold">
                   {emailResult.deliverabilityConfidence}% Confidence
@@ -302,7 +387,7 @@ Marcus`);
 
               <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono pt-1">
                 <span>MX: {emailResult.mxStatus}</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold">Safe to Cold Send</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">{emailResult.lineStatus || 'Direct Dial & Mobile Carrier Active'}</span>
               </div>
             </div>
           )}
@@ -384,6 +469,22 @@ Marcus`);
                 </div>
               </div>
 
+              {spamScore.flaggedWords && spamScore.flaggedWords.length > 0 && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400">
+                  <span className="font-bold flex items-center gap-1.5 mb-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>Detected Spam Trigger Words:</span>
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {spamScore.flaggedWords.map((word, idx) => (
+                      <span key={idx} className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono text-[11px] font-bold">
+                        "{word}"
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="pt-2 border-t border-slate-200 dark:border-white/10 space-y-1.5">
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                   LeadFlow Deliverability Recommendations:
@@ -409,21 +510,36 @@ Marcus`);
               <span>LinkedIn B2B Outreach &amp; Thought Leadership Hook Generator</span>
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Enter a core insight or topic to generate high-converting, scroll-stopping hooks for LinkedIn outreach notes and viral posts.
+              Enter target persona and value prop to generate high-converting, scroll-stopping hooks for LinkedIn outreach notes and viral posts.
             </p>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              Your Offer, Angle, or Insight
-            </label>
-            <input
-              type="text"
-              value={hookTopic}
-              onChange={e => setHookTopic(e.target.value)}
-              placeholder="e.g. Why cold calling is dead or How embedded fintech increases ARR"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                Target Persona
+              </label>
+              <input
+                type="text"
+                value={targetPersona}
+                onChange={e => setTargetPersona(e.target.value)}
+                placeholder="e.g. VP of Sales, CTO, CMO"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                Value Proposition / Topic Angle
+              </label>
+              <input
+                type="text"
+                value={hookTopic}
+                onChange={e => setHookTopic(e.target.value)}
+                placeholder="e.g. Why cold calling is dead or Managed appointment setting"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end">
@@ -436,12 +552,12 @@ Marcus`);
               {generatingHook ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Generating Hooks...</span>
+                  <span>Generating Conversational Hooks...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Generate Viral Hooks</span>
+                  <span>Generate 3 LinkedIn Hooks</span>
                 </>
               )}
             </button>
@@ -482,6 +598,34 @@ Marcus`);
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Discover real-time buying signals (hiring growth, tech migrations, funding rounds) to time your outbound outreach with precision.
             </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              value={intentCompany}
+              onChange={e => setIntentCompany(e.target.value)}
+              placeholder="e.g. Fintech / Enterprise Payments or stripe.com"
+              className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+            />
+            <button
+              type="button"
+              disabled={scanningIntent}
+              onClick={handleRunIntentScanner}
+              className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-md transition cursor-pointer flex items-center gap-2 shrink-0 disabled:opacity-50"
+            >
+              {scanningIntent ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Scanning Market Signals...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Scan Real-Time Intent</span>
+                </>
+              )}
+            </button>
           </div>
 
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300">

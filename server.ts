@@ -58,6 +58,7 @@ import { universalWebhookRouter } from './server/services/universalWebhookEngine
 import { rateCardRouter } from './server/services/rateCardEngine';
 import { offlineSyncRouter } from './server/routes/offlineSyncRoutes';
 import { emailRouter } from './server/services/emailEngine';
+import { gtmToolsRouter } from './server/routes/gtmToolsRoutes';
 
 dotenv.config();
 
@@ -167,6 +168,10 @@ app.use('/api/gdpr', gdprRouter);
 // AI Assistant & Unified Communications Inbox
 app.use('/api/ai', aiRouter);
 app.use('/api/inbox', inboxRouter);
+
+// Free Outbound & GTM Tools (Email & Mobile Finder, Spam Checker, Hook Generator)
+app.use('/api/gtm', gtmToolsRouter);
+app.use('/api/tools', gtmToolsRouter);
 
 // Agent-Reach Scraper & External Inbound Ingest (n8n, Python)
 app.use('/api/scraper', scraperRouter);
