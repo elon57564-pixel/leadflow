@@ -18,7 +18,32 @@ router.post('/login', (req: Request, res: Response) => {
     return res.status(401).json(result);
   }
 
-  return res.json(result);
+  // Set enterprise HttpOnly session cookie
+  if (result.token) {
+    res.cookie('alm_nexus_token', result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+  }
+
+  const userRole = result.user?.role;
+  const dashboardRedirect = userRole === 'client_guest' ? '/portal' : userRole === 'sales' ? '/pipeline' : '/dashboard';
+
+  return res.json({
+    ...result,
+    dashboardRedirect
+  });
+});
+
+// Logout (Clear Session Cookie)
+router.post('/logout', (req: Request, res: Response) => {
+  res.clearCookie('alm_nexus_token', {
+    httpOnly: true,
+    sameSite: 'lax'
+  });
+  return res.json({ success: true, message: 'Logged out successfully.' });
 });
 
 // Register

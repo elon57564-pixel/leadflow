@@ -454,8 +454,102 @@ projectRouter.get('/:id/discord-export', (req: Request, res: Response) => {
 });
 
 // ==========================================
-// 2. Lead Scoring Endpoints (/api/leads)
+// 2. Lead Scoring & Intake Endpoints (/api/leads)
 // ==========================================
+
+leadScoreRouter.get('/', (req: Request, res: Response) => {
+  const db = readDB();
+  const tenantId = (req as any).tenant_id || 'tenant-alm-nexus';
+  let leads = Array.isArray(db.projects) ? [...db.projects] : [];
+
+  leads = leads.filter(p => !p.tenantId || p.tenantId === tenantId || p.tenant_id === tenantId);
+  res.json({ success: true, count: leads.length, data: leads });
+});
+
+leadScoreRouter.post('/', (req: Request, res: Response) => {
+  const db = readDB();
+  const body = req.body || {};
+
+  if (!body.clientName && !body.name) {
+    return res.status(400).json({ success: false, error: 'Prospect/Client Name is required.' });
+  }
+
+  const tenantId = body.tenantId || body.tenant_id || (req as any).tenant_id || 'tenant-alm-nexus';
+  const leadId = body.id || `lead-${Date.now()}`;
+  const clientName = body.clientName || body.name || 'Anonymous Prospect';
+  const clientEmail = body.clientEmail || body.email || '';
+  const clientCompany = body.clientCompany || body.company || '';
+  const websiteUrl = body.websiteUrl || body.website || '';
+  const channel = body.channel || 'linkedin';
+  const dealSize = body.dealSize || '$5k - $15k ACV';
+
+  const newLead: any = {
+    id: leadId,
+    tenantId,
+    tenant_id: tenantId,
+    clientName,
+    clientEmail,
+    clientCompany,
+    clientPhone: body.clientPhone || body.phone || '',
+    websiteUrl,
+    channel,
+    websiteType: body.websiteType || 'landing',
+    purpose: body.notes || body.purpose || 'Outbound strategy consultation & pipeline acceleration',
+    estimatedPrice: Number(body.estimatedPrice) || 2990,
+    finalPrice: Number(body.finalPrice) || 2990,
+    status: body.status || 'lead',
+    source: body.source || 'leadflow_inbound',
+    bookingDate: body.bookingDate || '',
+    bookingTime: body.bookingTime || '',
+    timezone: body.timezone || 'America/New_York (EST)',
+    advancePaid: false,
+    balancePaid: false,
+    internalQAPassed: false,
+    domainTransferred: false,
+    assignedSalesperson: body.assignedSalesperson || 'Sarah Jenkins',
+    salespersonEmail: 'sarah.jenkins@agencyops.dev',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  const calculatedScore = calculateLeadScore(newLead);
+  newLead.leadScore = calculatedScore;
+
+  if (!Array.isArray(db.projects)) db.projects = [];
+  db.projects.unshift(newLead);
+
+  // Real-time Chat Notification for Internal Team
+  if (!Array.isArray(db.chatMessages)) db.chatMessages = [];
+  db.chatMessages.push({
+    id: `msg-lead-intake-${Date.now()}`,
+    senderId: 'bot-inbound-lead',
+    senderName: 'LeadFlow Inbound Bot',
+    senderRole: 'sales',
+    channel: 'leads-inbound',
+    content: `🔥 **New Qualified Strategy Booking Received**\n• Name: **${clientName}**\n• Company: **${clientCompany || 'N/A'}** (${clientEmail || 'No email'})\n• Channel: ${channel.toUpperCase()}\n• Deal Size / Plan: ${dealSize}\n• Schedule: ${body.bookingDate ? `${body.bookingDate} at ${body.bookingTime} (${body.timezone})` : 'Async Review'}\n• Lead Score: **${calculatedScore}/100**`,
+    timestamp: new Date().toISOString(),
+    reactions: { '🚀': 1, '🎯': 2 } as any
+  });
+
+  writeDB(db);
+
+  logAuditAction({
+    userId: 'system',
+    userName: clientName,
+    userRole: 'lead',
+    action: 'LEAD_INTAKE_SUBMITTED',
+    entityType: 'lead',
+    entityId: leadId,
+    details: { company: clientCompany, channel, bookingDate: body.bookingDate, score: calculatedScore },
+    ipAddress: req.ip || '127.0.0.1'
+  });
+
+  res.status(201).json({
+    success: true,
+    data: newLead,
+    message: 'Lead intake successfully captured and scored in CRM.'
+  });
+});
 
 leadScoreRouter.post('/score/:id', (req: Request, res: Response) => {
   const db = readDB();

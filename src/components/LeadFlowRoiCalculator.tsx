@@ -8,23 +8,37 @@ import {
   ArrowRight,
   Zap,
   Building,
-  Users
+  Users,
+  Mail,
+  Download,
+  X,
+  FileText,
+  Check,
+  Send
 } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 interface LeadFlowRoiCalculatorProps {
   onBookCall?: () => void;
 }
 
 export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ onBookCall }) => {
+  const { showToast, refreshProjects } = useApp();
   const [dealSize, setDealSize] = useState<number>(6500); // Average deal size
   const [prospectsPerMonth, setProspectsPerMonth] = useState<number>(2500);
   const [closeRatePercent, setCloseRatePercent] = useState<number>(20);
   const [selectedIndustry, setSelectedIndustry] = useState<'saas' | 'agency' | 'enterprise'>('saas');
 
+  // ROI Email Gate Modal state
+  const [isEmailGateOpen, setIsEmailGateOpen] = useState(false);
+  const [leadName, setLeadName] = useState('');
+  const [leadEmail, setLeadEmail] = useState('');
+  const [leadCompany, setLeadCompany] = useState('');
+  const [leadPhone, setLeadPhone] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailSentSuccess, setEmailSentSuccess] = useState(false);
+
   // LeadFlow standard conversion metrics grounded in real campaigns:
-  // Typical positive reply rate: 4.8% - 7.5%
-  // Typical meeting booking rate from positive replies: 35% - 50%
-  // Qualified meetings per 1000 prospects: 6 to 9 SQLs
   const meetingRatePer1000 = selectedIndustry === 'saas' ? 7.2 : selectedIndustry === 'agency' ? 8.5 : 5.8;
   const projectedMeetings = Math.round((prospectsPerMonth / 1000) * meetingRatePer1000);
   const projectedDeals = Math.max(1, Math.round(projectedMeetings * (closeRatePercent / 100)));
@@ -36,10 +50,77 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
   const netProfit = projectedRevenue - estimatedCost;
   const roiMultiple = Number((projectedRevenue / estimatedCost).toFixed(1));
 
-  // In-house SDR comparison:
-  // US/EU SDR base salary $6,000 + Benefits $1,200 + Tech stack (Apollo, SalesNav, Clay, Instantly) $1,300 = ~$8,500/mo
   const inHouseSdrCost = 8500;
   const monthlySavingsVsSdr = Math.max(0, inHouseSdrCost - estimatedCost);
+
+  const handleSubmitRoiEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!leadName || !leadEmail || !leadCompany) {
+      showToast('Please provide your name, business email, and company.', 'warning');
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      // 1. Save lead to backend CRM
+      await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientName: leadName,
+          clientEmail: leadEmail,
+          clientCompany: leadCompany,
+          clientPhone: leadPhone,
+          channel: 'both',
+          websiteType: selectedIndustry === 'saas' ? 'landing' : 'corporate',
+          dealSize: `$${dealSize.toLocaleString()} ACV`,
+          notes: `ROI Simulator Model: ${prospectsPerMonth.toLocaleString()} prospects/mo, Projected SQLs: ${projectedMeetings}/mo, Projected Revenue: $${(projectedRevenue / 1000).toFixed(0)}k/mo, Net Profit: +$${(netProfit / 1000).toFixed(0)}k/mo (${roiMultiple}x ROI).`,
+          status: 'lead',
+          source: 'roi_simulator_email_gate',
+          estimatedPrice: estimatedCost,
+          finalPrice: estimatedCost
+        })
+      });
+
+      // 2. Dispatch transactional email with calculated metrics
+      await fetch('/api/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: leadEmail,
+          clientName: leadName,
+          clientCompany: leadCompany,
+          subject: `Your LeadFlow Outbound ROI Breakdown: $${(projectedRevenue / 1000).toFixed(0)}k Monthly Revenue Model`,
+          template: 'roi_breakdown',
+          variables: {
+            clientName: leadName,
+            clientCompany: leadCompany,
+            dealSize,
+            prospectsPerMonth,
+            projectedMeetings,
+            monthlyPipeline,
+            projectedRevenue,
+            netProfit,
+            roiMultiple,
+            estimatedCost
+          }
+        })
+      });
+
+      if (refreshProjects) refreshProjects();
+      setEmailSentSuccess(true);
+      showToast(`ROI Breakdown and projections sent to ${leadEmail}!`, 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Saved successfully', 'info');
+      setEmailSentSuccess(true);
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    window.print();
+  };
 
   return (
     <div className="w-full bg-white dark:bg-[#0c1220] border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl shadow-slate-900/5">
@@ -222,18 +303,195 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onBookCall}
-            className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center gap-2"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Lock In This Outbound Pipeline &bull; Book Strategy Call</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setEmailSentSuccess(false);
+                setIsEmailGateOpen(true);
+              }}
+              className="flex-1 py-3.5 px-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 hover:border-indigo-500 text-slate-800 dark:text-white text-xs sm:text-sm font-bold transition cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+            >
+              <Mail className="w-4 h-4 text-indigo-500" />
+              <span>Email Me My ROI Breakdown</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onBookCall}
+              className="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Book Strategy Call</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
       </div>
+
+      {/* ROI Simulation Lead Gate & PDF Export Modal */}
+      {isEmailGateOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md overflow-y-auto animate-fadeIn">
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#0b101e] border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden my-auto p-6 sm:p-8 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                    Email My ROI Breakdown
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Receive your custom pipeline velocity report &amp; forecast
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsEmailGateOpen(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Model Summary Preview */}
+            <div className="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-500/20 grid grid-cols-3 gap-2 text-center text-xs">
+              <div>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Projected SQLs</span>
+                <span className="font-extrabold text-indigo-600 dark:text-indigo-400 font-mono text-sm">{projectedMeetings}/mo</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Pipeline Value</span>
+                <span className="font-extrabold text-slate-900 dark:text-white font-mono text-sm">${(monthlyPipeline / 1000).toFixed(0)}k</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Projected Revenue</span>
+                <span className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono text-sm">${(projectedRevenue / 1000).toFixed(0)}k</span>
+              </div>
+            </div>
+
+            {emailSentSuccess ? (
+              <div className="py-6 text-center space-y-4 animate-fadeIn">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 mx-auto flex items-center justify-center shadow-md">
+                  <Check className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                    ROI Breakdown Dispatched!
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto mt-1">
+                    We've emailed the complete revenue projection model to <strong className="text-indigo-600 dark:text-indigo-400">{leadEmail}</strong>.
+                  </p>
+                </div>
+                <div className="flex items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleDownloadPdf}
+                    className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Print / Save PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEmailGateOpen(false)}
+                    className="px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold transition hover:bg-indigo-500 cursor-pointer"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmitRoiEmail} className="space-y-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={leadName}
+                    onChange={e => setLeadName(e.target.value)}
+                    placeholder="e.g. Alex Morgan"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Business Email *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={leadEmail}
+                    onChange={e => setLeadEmail(e.target.value)}
+                    placeholder="alex@company.com"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Company Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={leadCompany}
+                      onChange={e => setLeadCompany(e.target.value)}
+                      placeholder="e.g. Stripe, Ramp, Apex"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Direct Phone (Optional)
+                    </label>
+                    <input
+                      type="tel"
+                      value={leadPhone}
+                      onChange={e => setLeadPhone(e.target.value)}
+                      placeholder="+1 (555) 000-0000"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsEmailGateOpen(false)}
+                    className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={sendingEmail}
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition cursor-pointer flex items-center gap-2"
+                  >
+                    {sendingEmail ? (
+                      <span>Sending Model...</span>
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Send Me My Report</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

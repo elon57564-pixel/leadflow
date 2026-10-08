@@ -96,6 +96,11 @@ Marcus`);
     intentLevel: 'Very High' | 'High' | 'Moderate';
     signals: string[];
     suggestedAngle: string;
+    recentHirings?: string[];
+    fundingStatus?: string;
+    techStackChanges?: string[];
+    growthTriggers?: string[];
+    provider?: string;
   }>({
     intentLevel: 'Very High',
     signals: [
@@ -103,6 +108,10 @@ Marcus`);
       'Recent Series B funding announcement ($24M) indicates aggressive outbound pipeline mandate',
       'Tech stack updated: Migrated from HubSpot to Salesforce CRM + Apollo API'
     ],
+    recentHirings: ['Head of Outbound Partnerships', 'Enterprise Account Executive', 'RevOps Lead'],
+    fundingStatus: 'Series B ($24M Growth Round) &bull; Aggressive GTM Mandate',
+    techStackChanges: ['HubSpot CRM &bull; Apollo API &bull; Clay Data Waterfall'],
+    growthTriggers: ['Accelerating enterprise SDR pipeline before Q4 target'],
     suggestedAngle: 'Reach out to the VP of Commercial Growth referencing their recent hiring expansion and offer immediate appointment setting to accelerate time-to-revenue.'
   });
 
@@ -649,13 +658,45 @@ Marcus`);
               ))}
             </div>
 
-            <div className="pt-3 border-t border-slate-200 dark:border-white/10">
-              <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 block mb-1">
-                Recommended Outbound Angle:
-              </span>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">
-                "{intentResults.suggestedAngle}"
-              </p>
+            {/* Structured Triggers (Hirings, Funding, Tech Migrations) */}
+            {(intentResults.recentHirings || intentResults.fundingStatus || intentResults.techStackChanges) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                {intentResults.recentHirings && intentResults.recentHirings.length > 0 && (
+                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase font-mono block mb-1">Recent Hiring Triggers</span>
+                    <div className="flex flex-wrap gap-1">
+                      {intentResults.recentHirings.map((h, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] font-bold">
+                          {h}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {intentResults.fundingStatus && (
+                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase font-mono block mb-1">Funding &amp; Capital Momentum</span>
+                    <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400" dangerouslySetInnerHTML={{ __html: intentResults.fundingStatus }} />
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div className="flex-1">
+                <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 block mb-0.5">
+                  Recommended Outbound Angle:
+                </span>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">
+                  "{intentResults.suggestedAngle}"
+                </p>
+              </div>
+              {intentResults.provider && (
+                <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-mono shrink-0">
+                  {intentResults.provider}
+                </span>
+              )}
             </div>
           </div>
         </div>

@@ -41,6 +41,7 @@ import { useApp } from '../context/AppContext';
 import { LeadFlowBookingModal } from './LeadFlowBookingModal';
 import { LeadFlowRoiCalculator } from './LeadFlowRoiCalculator';
 import { LeadFlowFreeToolsSection } from './LeadFlowFreeToolsSection';
+import { InteractiveCampaignDrawer, CampaignTemplate } from './InteractiveCampaignDrawer';
 import { ThemeToggle } from './ThemeToggle';
 import { UserRole } from '../types';
 
@@ -59,7 +60,8 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
     switchPersona, 
     showToast, 
     setIsOnboardingModalOpen,
-    setActiveTab
+    setActiveTab,
+    refreshProjects
   } = useApp();
 
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -70,6 +72,29 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
   const [currency, setCurrency] = useState<'USD' | 'EUR' | 'GBP'>('USD');
   const [currencyMultiplier, setCurrencyMultiplier] = useState(1);
   const [currencySymbol, setCurrencySymbol] = useState('$');
+
+  // Interactive Campaign Drawer State
+  const [isCampaignDrawerOpen, setIsCampaignDrawerOpen] = useState(false);
+  const [selectedCampaignForDrawer, setSelectedCampaignForDrawer] = useState<CampaignTemplate | null>(null);
+
+  // Stripe Checkout Loading State
+  const [checkingOutTier, setCheckingOutTier] = useState<string | null>(null);
+
+  // Check URL params for checkout=success
+  React.useEffect(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('checkout') === 'success') {
+        const tier = urlParams.get('tier') || 'business';
+        const amount = urlParams.get('amount') || '2,990';
+        showToast(`🎉 Payment Confirmed! Stripe session verified for ${tier.toUpperCase()} tier ($${amount}). Welcome to LeadFlow!`, 'success');
+        if (refreshProjects) refreshProjects();
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } catch {
+      // Non-blocking
+    }
+  }, []);
 
   const handleCurrencyChange = (curr: 'USD' | 'EUR' | 'GBP') => {
     setCurrency(curr);
@@ -88,6 +113,51 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
   const handleOpenBooking = (planName?: string) => {
     if (planName) setSelectedPlanForBooking(planName);
     setIsBookingModalOpen(true);
+  };
+
+  const handleOpenCampaignDrawer = (cs: typeof caseStudies[0]) => {
+    setSelectedCampaignForDrawer({
+      badge: cs.badge,
+      headline: cs.headline,
+      icp: cs.icp,
+      sqlsMetric: cs.sqlsMetric,
+      sqlsSubtitle: cs.sqlsSubtitle,
+      results: cs.results,
+      steps: cs.steps,
+      quote: cs.quote
+    });
+    setIsCampaignDrawerOpen(true);
+  };
+
+  const handleChoosePlanCheckout = async (tier: 'pilot' | 'business' | 'enterprise', planTitle: string, basePrice: number) => {
+    setCheckingOutTier(tier);
+    try {
+      const finalAmount = Math.round(basePrice * currencyMultiplier);
+      const res = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planTier: tier,
+          planName: `${planTitle} (${currencySymbol}${finalAmount}/mo)`,
+          amount: finalAmount,
+          currency,
+          customerName: currentUser?.name || 'Prospect Client',
+          customerEmail: currentUser?.email || 'prospect@business.com',
+          companyName: 'Client Enterprise'
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.url) {
+        showToast(`Creating Stripe checkout session for ${planTitle}...`, 'info');
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Failed to initialize Stripe checkout session');
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'Error connecting to Stripe checkout', 'error');
+    } finally {
+      setCheckingOutTier(null);
+    }
   };
 
   // Case studies mirroring LeadFlow's genuine campaigns
@@ -110,6 +180,51 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
         step2: 'Step 2 (Day 3): Cold Email highlighting interchange margin leakage in cross-border settlements.',
         step3: 'Step 3 (Day 7): Case study snapshot showing a similar platform reducing transaction friction by 31%.'
       },
+      steps: [
+        {
+          stepNumber: 1,
+          day: 'Day 1',
+          channel: 'linkedin' as const,
+          title: 'Soft LinkedIn Connection Hook',
+          content: 'Hi {{firstName}} — noticed your team\'s recent expansion into the UK/DACH corridor. Curious how you\'re navigating interchange spread as platform GMV scales? We put together a 2-page benchmark from 40 European marketplaces that might be helpful.',
+          proTip: 'Send as a personalized connection note without any direct pitch or scheduling link.'
+        },
+        {
+          stepNumber: 2,
+          day: 'Day 3',
+          channel: 'email' as const,
+          title: 'Primary Cold Email: Settlement Margin Leakage',
+          subject: '{{company}} marketplace settlement margin leakage / benchmark',
+          content: 'Hi {{firstName}},\n\nReaching out because most Chief Commercial Officers running $20M–$80M GMV platforms lose between 28 and 42 bps on cross-border payment settlements without realizing it.\n\nWe helped a peer DACH marketplace recover $140,000 in net annual processing spread in their first 60 days.\n\nOpen to reviewing the 1-page breakdown? Happy to send it over asynchronously.',
+          proTip: 'Keep under 70 words. Low-friction "mind if I send the 1-page breakdown" CTA has a 6.8% positive response rate.'
+        },
+        {
+          stepNumber: 3,
+          day: 'Day 7',
+          channel: 'email' as const,
+          title: 'Follow-Up Email: 31% Friction Reduction Case Study',
+          subject: 'Re: {{company}} marketplace settlement margin leakage',
+          content: 'Quick follow-up {{firstName}} — here is what that transition looked like for a peer marketplace:\n\n• Zero changes to merchant checkout UX\n• Instant dynamic routing for SEPA & BACS rails\n• Result: 31% drop in settlement friction\n\nWorth a 10-minute exploratory sync this Thursday at 2:30pm?',
+          proTip: 'Always reply in the original email thread to retain context and respect the prospect\'s inbox.'
+        },
+        {
+          stepNumber: 4,
+          day: 'Day 11',
+          channel: 'linkedin' as const,
+          title: 'LinkedIn InMail / Voice Note Follow-Up',
+          content: 'Hey {{firstName}} — dropped a quick note in your inbox regarding the cross-border payment benchmarks. Just saw your team announced the new platform launch — congrats! Let me know if you\'d like the benchmark breakdown.',
+          proTip: 'Combining email with a LinkedIn profile touchpoint increases response probability by 2.4x.'
+        },
+        {
+          stepNumber: 5,
+          day: 'Day 16',
+          channel: 'email' as const,
+          title: 'Polite Permission to Close the Loop',
+          subject: 'Closing the loop on payment margins',
+          content: '{{firstName}} — assuming this isn\'t on your roadmap this quarter, which is completely fine!\n\nI\'ll stop reaching out. If you ever want to see how your processing margin compares against peer platforms, our benchmark tool is always live at leadflow.dev/benchmarks.\n\nWishing you all the best with the expansion!',
+          proTip: 'The breakup touch often triggers up to 25% of total replies from busy executives.'
+        }
+      ],
       quote: '"LeadFlow has been our single most predictable pipeline generator across the UK and DACH regions."'
     },
     {
@@ -130,6 +245,43 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
         step2: 'Step 2 (Day 4): 2-line follow-up with a 15-second audio spectrogram demo link.',
         step3: 'Step 3 (Day 9): Direct executive invite to discuss reduced agent burnout metrics.'
       },
+      steps: [
+        {
+          stepNumber: 1,
+          day: 'Day 1',
+          channel: 'email' as const,
+          title: 'QA Auditing Bottleneck Teardown',
+          subject: 'Auditing 10,000 daily agent calls at {{company}}',
+          content: 'Hi {{firstName}},\n\nQuick question: what percentage of your contact center calls does your QA team currently review manually? Most enterprise teams we talk to can barely sample 1.5%.\n\nWe deployed an acoustic speech model that audits 100% of calls in real-time, cutting compliance review costs by 64%.\n\nWould it make sense to send you a 45-second interactive spectrogram demo?',
+          proTip: 'Ask about a tangible operational pain (1.5% QA sampling rate) that the executive lives every day.'
+        },
+        {
+          stepNumber: 2,
+          day: 'Day 4',
+          channel: 'linkedin' as const,
+          title: 'LinkedIn Contextual Engagement',
+          content: 'Hi {{firstName}} — noticed your team is hiring bilingual agents in the US. How is your team handling automated sentiment tagging during peak volume? Sent a quick note to your email with a demo.',
+          proTip: 'Reference real hiring activity discovered via Google Search / LinkedIn intent signals.'
+        },
+        {
+          stepNumber: 3,
+          day: 'Day 8',
+          channel: 'email' as const,
+          title: 'Spectrogram Demo & Proof Point',
+          subject: 'Re: Auditing 10,000 daily agent calls at {{company}}',
+          content: 'Hi {{firstName}},\n\nHere is a 15-second loom recording of the engine identifying audio latency and customer frustration markers in real-time.\n\nAre you free for 10 minutes this Wednesday to review how this would integrate with your current telephony stack?',
+          proTip: 'Attach a brief visual or audio proof point instead of generic marketing brochures.'
+        },
+        {
+          stepNumber: 4,
+          day: 'Day 14',
+          channel: 'email' as const,
+          title: 'Executive Breakup / Resource Handoff',
+          subject: 'Should I pause for {{company}}?',
+          content: '{{firstName}} — figured you\'re focused on other initiatives right now. I\'ll pause our emails. If automated speech QA becomes a priority later this year, let me know!\n\nBest,\nLeadFlow Team',
+          proTip: 'Clean and respectful closing touch keeps the door open for future quarter restarts.'
+        }
+      ],
       quote: '"Within 90 days, LeadFlow booked meetings with 3 of our top 10 dream accounts."'
     },
     {
@@ -150,6 +302,33 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
         step2: 'Step 2 (Day 5): Invitation to review latency benchmarking across Riyadh and Jeddah hubs.',
         step3: 'Step 3 (Day 10): Direct WhatsApp follow-up once prospect engaged with technical whitepaper.'
       },
+      steps: [
+        {
+          stepNumber: 1,
+          day: 'Day 1',
+          channel: 'linkedin' as const,
+          title: 'Bilingual Executive Peer Note',
+          content: 'Salam {{firstName}} — noticed {{company}}\'s digital infrastructure expansion in Riyadh. How are you maintaining sub-5ms peering latency between your cloud data centers? Shared a brief benchmark note with fellow CTOs in KSA.',
+          proTip: 'Localize language and cultural conventions for regional GCC decision-makers.'
+        },
+        {
+          stepNumber: 2,
+          day: 'Day 4',
+          channel: 'email' as const,
+          title: 'Infrastructure SLA Benchmark Teardown',
+          subject: 'Sub-5ms peering latency between Riyadh & Jeddah hubs ({{company}})',
+          content: 'Hi {{firstName}},\n\nReaching out because high-throughput government and commercial infrastructure in Saudi Arabia cannot afford 99.8% SLA dropouts.\n\nOur redundant SD-WAN backbone guarantees 99.999% uptime with direct cloud peering at both Riyadh and Jeddah exchanges.\n\nWould you be open to reviewing the latency report this week?',
+          proTip: 'Highlight mission-critical uptime metrics (99.999% SLA) that IT Directors are measured on.'
+        },
+        {
+          stepNumber: 3,
+          day: 'Day 9',
+          channel: 'phone' as const,
+          title: 'Technical Executive Handoff Call',
+          content: 'Direct briefing touchpoint with Senior Enterprise Network Engineer to review direct fiber trunk options.',
+          proTip: 'For large deals ($35k+ ACV), multi-channel phone and WhatsApp touchpoints accelerate sales velocity.'
+        }
+      ],
       quote: '"The quality of enterprise decision-makers on our calendar was outstanding from week two."'
     }
   ];
@@ -558,7 +737,7 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
 
                   <button
                     type="button"
-                    onClick={() => handleOpenBooking(`Case Study Plan: ${cs.badge}`)}
+                    onClick={() => handleOpenCampaignDrawer(cs)}
                     className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition cursor-pointer flex items-center gap-2 shrink-0"
                   >
                     <span>Replicate This Campaign</span>
@@ -998,13 +1177,34 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => handleOpenBooking(`Pilot Scope (${currencySymbol}${Math.round(999 * currencyMultiplier)}/mo)`)}
-                className="w-full py-3 rounded-xl border border-slate-300 dark:border-white/10 hover:border-indigo-500 text-slate-800 dark:text-white hover:text-indigo-600 text-xs font-bold transition cursor-pointer text-center"
-              >
-                Choose Pilot Sprint
-              </button>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  disabled={checkingOutTier === 'pilot'}
+                  onClick={() => handleChoosePlanCheckout('pilot', 'Pilot Sprint', 999)}
+                  className="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold transition cursor-pointer text-center flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                >
+                  {checkingOutTier === 'pilot' ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Creating Stripe Session...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Choose Pilot Plan &bull; {currencySymbol}{Math.round(999 * currencyMultiplier)}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenBooking(`Pilot Scope (${currencySymbol}${Math.round(999 * currencyMultiplier)}/mo)`)}
+                  className="w-full py-2 rounded-xl text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white text-[11px] font-semibold transition cursor-pointer text-center"
+                >
+                  Or discuss plan on a fit call
+                </button>
+              </div>
             </div>
 
             {/* Tier 2: BUSINESS (Featured) */}
@@ -1060,13 +1260,34 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => handleOpenBooking(`Business Retainer (${currencySymbol}${Math.round(2990 * currencyMultiplier)}/mo)`)}
-                className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-600/30 transition cursor-pointer text-center"
-              >
-                Launch Business Outbound
-              </button>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  disabled={checkingOutTier === 'business'}
+                  onClick={() => handleChoosePlanCheckout('business', 'Business Retainer', 2990)}
+                  className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-600/30 transition cursor-pointer text-center flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {checkingOutTier === 'business' ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Creating Stripe Session...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Choose Business Retainer &bull; {currencySymbol}{Math.round(2990 * currencyMultiplier)}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenBooking(`Business Retainer (${currencySymbol}${Math.round(2990 * currencyMultiplier)}/mo)`)}
+                  className="w-full py-2 rounded-xl text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-white text-[11px] font-bold transition cursor-pointer text-center"
+                >
+                  Or discuss plan on a fit call
+                </button>
+              </div>
             </div>
 
             {/* Tier 3: ENTERPRISE */}
@@ -1114,13 +1335,34 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => handleOpenBooking(`Enterprise Custom Scope (${currencySymbol}${Math.round(5490 * currencyMultiplier)}/mo)`)}
-                className="w-full py-3 rounded-xl border border-slate-300 dark:border-white/10 hover:border-indigo-500 text-slate-800 dark:text-white hover:text-indigo-600 text-xs font-bold transition cursor-pointer text-center"
-              >
-                Discuss Enterprise Scope
-              </button>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  disabled={checkingOutTier === 'enterprise'}
+                  onClick={() => handleChoosePlanCheckout('enterprise', 'Enterprise Scaling', 5490)}
+                  className="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold transition cursor-pointer text-center flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                >
+                  {checkingOutTier === 'enterprise' ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Creating Stripe Session...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Choose Enterprise Plan &bull; {currencySymbol}{Math.round(5490 * currencyMultiplier)}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenBooking(`Enterprise Custom Scope (${currencySymbol}${Math.round(5490 * currencyMultiplier)}/mo)`)}
+                  className="w-full py-2 rounded-xl text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white text-[11px] font-semibold transition cursor-pointer text-center"
+                >
+                  Or discuss custom enterprise scope
+                </button>
+              </div>
             </div>
 
           </div>
@@ -1358,6 +1600,14 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
         preselectedPlan={selectedPlanForBooking}
+      />
+
+      {/* Interactive Sequence Playbook Drawer */}
+      <InteractiveCampaignDrawer
+        isOpen={isCampaignDrawerOpen}
+        onClose={() => setIsCampaignDrawerOpen(false)}
+        campaign={selectedCampaignForDrawer}
+        onDeployCampaign={(campaignName) => handleOpenBooking(`Replicate Sequence: ${campaignName}`)}
       />
     </div>
   );

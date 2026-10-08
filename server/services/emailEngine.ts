@@ -42,6 +42,30 @@ export function renderEmailTemplate(template: string, vars: Record<string, any> 
     </div>`;
   }
 
+  if (template === 'roi_breakdown') {
+    return `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; color: #1e293b;">
+      <div style="background: linear-gradient(135deg, #4f46e5, #2563eb); padding: 18px; border-radius: 12px; color: #ffffff; margin-bottom: 20px;">
+        <h2 style="margin: 0; font-size: 20px; font-weight: 800;">LeadFlow &bull; Outbound Pipeline ROI Projection</h2>
+        <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">Custom Revenue & Pipeline Velocity Modeling for ${cCompany}</p>
+      </div>
+      <p>Dear ${cName},</p>
+      <p>Thank you for modeling your pipeline with the LeadFlow Outbound ROI Simulator. Below is your detailed revenue projection breakdown:</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px;">
+        <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px 0; color: #64748b;">Average Deal Size (ACV):</td><td style="padding: 10px 0; font-weight: bold; text-align: right;">$${(vars.dealSize || 6500).toLocaleString()}</td></tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px 0; color: #64748b;">Monthly Verified Prospects:</td><td style="padding: 10px 0; font-weight: bold; text-align: right;">${(vars.prospectsPerMonth || 2500).toLocaleString()}</td></tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px 0; color: #64748b;">Projected Qualified SQLs / mo:</td><td style="padding: 10px 0; font-weight: bold; text-align: right; color: #4f46e5;">${vars.projectedMeetings || 18} meetings</td></tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px 0; color: #64748b;">Monthly Pipeline Velocity:</td><td style="padding: 10px 0; font-weight: bold; text-align: right;">$${((vars.monthlyPipeline || 117000) / 1000).toFixed(0)}k</td></tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px 0; color: #64748b;">Projected Closed Revenue / mo:</td><td style="padding: 10px 0; font-weight: bold; text-align: right; color: #10b981; font-size: 16px;">$${((vars.projectedRevenue || 26000) / 1000).toFixed(0)}k</td></tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px 0; color: #64748b;">Estimated Net Profit:</td><td style="padding: 10px 0; font-weight: bold; text-align: right; color: #10b981;">+$${((vars.netProfit || 23010) / 1000).toFixed(0)}k</td></tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px 0; color: #64748b;">Expected Revenue Multiple:</td><td style="padding: 10px 0; font-weight: bold; text-align: right; color: #4f46e5; font-size: 16px;">${vars.roiMultiple || 8.7}x ROI</td></tr>
+      </table>
+      <div style="background-color: #f8fafc; border-left: 4px solid #4f46e5; padding: 14px; border-radius: 6px; font-size: 13px; color: #475569; margin: 20px 0;">
+        <strong>Next Step:</strong> Our team handles prospect research, copy testing, inbox warmup, and reply handling on a managed retainer. You can launch your campaign in 7 business days.
+      </div>
+      <p style="font-size: 13px; color: #64748b;">Best regards,<br><strong>LeadFlow Outbound Team</strong> &bull; ALM Nexus Enterprise</p>
+    </div>`;
+  }
+
   return `<div style="font-family: Arial, sans-serif; padding: 20px; color: #1e293b;">
     <p>Dear ${cName},</p>
     <p>${vars.body || 'Thank you for connecting with ClientOps.'}</p>

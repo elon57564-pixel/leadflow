@@ -59,6 +59,7 @@ import { rateCardRouter } from './server/services/rateCardEngine';
 import { offlineSyncRouter } from './server/routes/offlineSyncRoutes';
 import { emailRouter } from './server/services/emailEngine';
 import { gtmToolsRouter } from './server/routes/gtmToolsRoutes';
+import { checkoutRouter } from './server/routes/checkoutRoutes';
 
 dotenv.config();
 
@@ -172,6 +173,9 @@ app.use('/api/inbox', inboxRouter);
 // Free Outbound & GTM Tools (Email & Mobile Finder, Spam Checker, Hook Generator)
 app.use('/api/gtm', gtmToolsRouter);
 app.use('/api/tools', gtmToolsRouter);
+
+// Stripe Checkout & Payment Gateway Sessions
+app.use('/api/checkout', checkoutRouter);
 
 // Agent-Reach Scraper & External Inbound Ingest (n8n, Python)
 app.use('/api/scraper', scraperRouter);
