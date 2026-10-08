@@ -1,9 +1,121 @@
 import { Router, Request, Response } from 'express';
 import { GoogleGenAI } from '@google/genai';
 import { readDB, writeDB } from '../db';
+import {
+  enrichLeadWithGoogleSearch,
+  verifyLocationWithGoogleMaps,
+  generateCreativeImage,
+  transcribeAndProcessVoiceNote,
+  processContextAwareChatbotMessage
+} from '../services/geminiService';
 
 export const aiRouter = Router();
 export const inboxRouter = Router();
+
+// ==========================================
+// ADVANCED GEMINI INTEGRATIONS
+// ==========================================
+
+// 1. Google Search Grounding: Lead Enrichment
+aiRouter.post('/enrich-lead', async (req: Request, res: Response) => {
+  const { companyName, leadName, industry, websiteUrl } = req.body || {};
+  if (!companyName) {
+    return res.status(400).json({ success: false, error: 'companyName is required.' });
+  }
+
+  const tenantId = (req as any).tenant_id || 'tenant-alm-nexus';
+  const result = await enrichLeadWithGoogleSearch({
+    companyName,
+    leadName,
+    industry,
+    websiteUrl,
+    tenantId
+  });
+
+  res.json({ success: true, data: result });
+});
+
+// 2. Google Maps Grounding: Location Geocoding & Verification
+aiRouter.post('/maps-verify', async (req: Request, res: Response) => {
+  const { locationName, address } = req.body || {};
+  if (!locationName) {
+    return res.status(400).json({ success: false, error: 'locationName is required.' });
+  }
+
+  const tenantId = (req as any).tenant_id || 'tenant-alm-nexus';
+  const result = await verifyLocationWithGoogleMaps({
+    locationName,
+    address,
+    tenantId
+  });
+
+  res.json({ success: true, data: result });
+});
+
+// 3. AI Image Generation & Creative Studio Engine
+aiRouter.post('/generate-creative', async (req: Request, res: Response) => {
+  const { prompt, aspectRatio, base64SourceImage } = req.body || {};
+  if (!prompt) {
+    return res.status(400).json({ success: false, error: 'Prompt is required.' });
+  }
+
+  const tenantId = (req as any).tenant_id || 'tenant-alm-nexus';
+  const result = await generateCreativeImage({
+    prompt,
+    aspectRatio,
+    base64SourceImage,
+    tenantId
+  });
+
+  res.json({ success: true, data: result });
+});
+
+// GET /api/ai/media-vault - Retrieve multi-tenant Media Vault creative assets
+aiRouter.get('/media-vault', (req: Request, res: Response) => {
+  const db = readDB();
+  const tenantId = (req as any).tenant_id || 'tenant-alm-nexus';
+  const vault = ((db as any).mediaVault || []).filter(
+    (m: any) => !m.tenantId || m.tenantId === tenantId || m.tenantId === 'tenant-global'
+  );
+
+  res.json({ success: true, data: vault });
+});
+
+// 4. Gemini Voice Transcriber & Audio Task Processor
+aiRouter.post('/transcribe-voice', async (req: Request, res: Response) => {
+  const { base64Audio, mimeType, createTasksInKanban } = req.body || {};
+  if (!base64Audio) {
+    return res.status(400).json({ success: false, error: 'base64Audio payload is required.' });
+  }
+
+  const tenantId = (req as any).tenant_id || 'tenant-alm-nexus';
+  const result = await transcribeAndProcessVoiceNote({
+    base64Audio,
+    mimeType,
+    tenantId,
+    createTasksInKanban: createTasksInKanban ?? true
+  });
+
+  res.json({ success: true, data: result });
+});
+
+// 5. Gemini Context-Aware Embedded Chatbot with Function Calling
+aiRouter.post('/copilot-chat', async (req: Request, res: Response) => {
+  const { message, conversationHistory, role } = req.body || {};
+  if (!message) {
+    return res.status(400).json({ success: false, error: 'Message content is required.' });
+  }
+
+  const tenantId = (req as any).tenant_id || 'tenant-alm-nexus';
+  const result = await processContextAwareChatbotMessage({
+    message,
+    conversationHistory,
+    role: role || (req as any).user?.role || 'admin',
+    tenantId
+  });
+
+  res.json({ success: true, data: result });
+});
 
 // Lazy Gemini AI initialization
 let aiClient: GoogleGenAI | null = null;

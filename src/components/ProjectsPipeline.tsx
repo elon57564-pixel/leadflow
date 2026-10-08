@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { ProjectLead, WebsiteType, LeadChannel } from '../types';
+import { GoogleMapsWidget } from './GoogleMapsWidget';
+import { VoiceTaskProcessorWidget } from './VoiceTaskProcessorWidget';
 import {
   Search,
   Filter,
@@ -1514,6 +1516,15 @@ export const ProjectsPipeline: React.FC = () => {
           </table>
         </div>
       )}
+
+      {/* Grounding & Voice Intelligence Hub */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4">
+        <VoiceTaskProcessorWidget />
+        <GoogleMapsWidget
+          locationName={filteredProjects[0]?.clientCompany || filteredProjects[0]?.clientName || 'LeadFlow Enterprise Hub'}
+          initialAddress={filteredProjects[0]?.clientCompany ? `${filteredProjects[0].clientCompany} HQ` : 'Global Tech District'}
+        />
+      </div>
       </>
       )}
 

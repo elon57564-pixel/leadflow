@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { calculateCommission } from '../data/sopContent';
 import { WebsiteType, LeadChannel } from '../types';
-import { X, Plus, DollarSign, UserCheck, ShieldCheck } from 'lucide-react';
+import { X, Plus, DollarSign, UserCheck, ShieldCheck, RefreshCw, Sparkles } from 'lucide-react';
 
 export const NewClientLeadModal: React.FC = () => {
   const { isNewLeadModalOpen, setIsNewLeadModalOpen, refreshProjects, showToast, t, currentTenant, authToken } = useApp();
@@ -16,8 +16,45 @@ export const NewClientLeadModal: React.FC = () => {
   const [purpose, setPurpose] = useState('');
   const [assignedSalesperson, setAssignedSalesperson] = useState('Sarah Jenkins');
   const [submitting, setSubmitting] = useState(false);
+  const [enriching, setEnriching] = useState(false);
 
   if (!isNewLeadModalOpen) return null;
+
+  const handleEnrichLeadIntel = async () => {
+    const targetCompany = clientCompany.trim() || clientName.trim();
+    if (!targetCompany) {
+      showToast('Please enter a Client or Company Name first.', 'info');
+      return;
+    }
+
+    setEnriching(true);
+    try {
+      const res = await fetch('/api/ai/enrich-lead', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Tenant-Id': currentTenant?.id || 'tenant-alm-nexus',
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+        },
+        body: JSON.stringify({
+          companyName: targetCompany,
+          industry: websiteType,
+          leadName: clientName
+        })
+      });
+
+      const json = await res.json();
+      if (json.success && json.data) {
+        const data = json.data;
+        setPurpose(`[Google Search Intel]: ${data.summary}\nTech Stack: ${data.techStack?.join(', ')}\nValue Hook: ${data.valueHook}`);
+        showToast(`🎉 Search Grounding: Discovered ${data.techStack?.length || 0} tech stack insights for ${targetCompany}!`);
+      }
+    } catch (err: any) {
+      showToast('Could not fetch search grounding intel: ' + err.message, 'error');
+    } finally {
+      setEnriching(false);
+    }
+  };
 
   // Auto-calculated SOP metrics
   const commission = calculateCommission(finalPrice);
@@ -199,14 +236,34 @@ export const NewClientLeadModal: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-[11px] font-bold text-slate-500 block mb-1">
-              Project Purpose &amp; Deliverables Checklist
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[11px] font-bold text-slate-500">
+                Project Purpose &amp; Deliverables Checklist
+              </label>
+              <button
+                type="button"
+                onClick={handleEnrichLeadIntel}
+                disabled={enriching}
+                className="px-2 py-0.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold transition cursor-pointer flex items-center gap-1 border border-indigo-500/20"
+              >
+                {enriching ? (
+                  <>
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                    <span>Searching Google...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3 h-3" />
+                    <span>Google Search Grounding Intel</span>
+                  </>
+                )}
+              </button>
+            </div>
             <textarea
-              rows={2}
+              rows={3}
               value={purpose}
               onChange={e => setPurpose(e.target.value)}
-              placeholder="e.g. Modern boutique hotel booking website with high-res photos and responsive design."
+              placeholder="Provide context or click 'Google Search Grounding Intel' to auto-fetch tech stack & company news..."
               className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
             />
           </div>

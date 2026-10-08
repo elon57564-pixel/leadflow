@@ -44,7 +44,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
     setIsActivityFeedOpen,
     setIsWikiModalOpen,
     setIsPlatformHealthModalOpen,
-    setIsCommandPaletteOpen
+    setIsCommandPaletteOpen,
+    setIsCreativeStudioOpen
   } = useApp();
 
   const tabTitles: Record<string, { title: string; subtitle: string }> = {
@@ -102,6 +103,15 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
           <Search className="w-3.5 h-3.5 text-slate-400" />
           <span className="hidden xl:inline text-[11px] text-slate-500 dark:text-slate-400">Search commands...</span>
           <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-[9px] font-mono text-slate-500 font-bold">⌘K</kbd>
+        </button>
+
+        {/* AI Creative Studio & Media Vault Button */}
+        <button
+          onClick={() => setIsCreativeStudioOpen(true)}
+          className="p-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 transition cursor-pointer"
+          title="AI Creative Studio & Media Vault"
+        >
+          <Sparkles className="w-4 h-4" />
         </button>
 
         {/* Global Wiki Button */}

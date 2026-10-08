@@ -135,6 +135,9 @@ interface AppContextType {
   // Global Command Palette (⌘K)
   isCommandPaletteOpen: boolean;
   setIsCommandPaletteOpen: (open: boolean) => void;
+  // Creative Studio & Media Vault
+  isCreativeStudioOpen: boolean;
+  setIsCreativeStudioOpen: (open: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -325,6 +328,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [discordExportModalData, setDiscordExportModalData] = useState<ProjectLead | null>(null);
   const [automatedTestsPassedCount, setAutomatedTestsPassedCount] = useState<number>(17);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isCreativeStudioOpen, setIsCreativeStudioOpen] = useState(false);
 
   // Load Tenants from API
   const refreshTenants = async () => {
@@ -1052,7 +1056,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         scaleMode,
         setScaleMode,
         isCommandPaletteOpen,
-        setIsCommandPaletteOpen
+        setIsCommandPaletteOpen,
+        isCreativeStudioOpen,
+        setIsCreativeStudioOpen
       }}
     >
       {children}

@@ -45,6 +45,8 @@ import { RoleRouteGuard } from './components/RoleRouteGuard';
 import { OfflineSyncBanner } from './components/OfflineSyncBanner';
 import { LeadFlowLandingView } from './components/LeadFlowLandingView';
 import { GlobalCommandPalette } from './components/GlobalCommandPalette';
+import { CreativeStudioModal } from './components/CreativeStudioModal';
+import { EmbeddedGeminiChatbot } from './components/EmbeddedGeminiChatbot';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { X } from 'lucide-react';
 
@@ -65,6 +67,8 @@ const AppContent: React.FC = () => {
     setIsPlatformHealthModalOpen,
     isCommandPaletteOpen,
     setIsCommandPaletteOpen,
+    isCreativeStudioOpen,
+    setIsCreativeStudioOpen,
     toasts,
     dismissToast,
     projects,
@@ -327,6 +331,11 @@ const AppContent: React.FC = () => {
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
       />
+      <CreativeStudioModal
+        isOpen={isCreativeStudioOpen}
+        onClose={() => setIsCreativeStudioOpen(false)}
+      />
+      <EmbeddedGeminiChatbot />
       <OfflineSyncBanner />
       <NewClientLeadModal />
       <AIAssistantModal />
