@@ -259,22 +259,22 @@ Marcus`);
   };
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-lg">
+    <div className="w-full bg-white dark:bg-[#0a192f] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 lg:p-10 shadow-sm">
       <div className="text-center max-w-2xl mx-auto mb-8">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 text-xs font-bold font-mono mb-3">
-          <Wrench className="w-3.5 h-3.5" />
-          <span>100% FREE GTM TOOLS &bull; NO SIGNUP REQUIRED</span>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold font-mono mb-3">
+          <Wrench className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span>FREE GTM PROSPECTING ENGINE &bull; NO SUBSCRIPTION REQUIRED</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-          Free Outbound &amp; GTM Tools
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+          Enterprise Outbound &amp; GTM Operations Tools
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 font-normal">
           Use the same proprietary tools our outbound team relies on to verify decision-maker emails, analyze spam triggers, and optimize outreach.
         </p>
       </div>
 
       {/* Tool Selector Tabs */}
-      <div className="flex items-center justify-center gap-2 flex-wrap mb-8">
+      <div className="flex items-center justify-center gap-1.5 flex-wrap mb-8 p-1.5 bg-slate-100 dark:bg-slate-850/80 rounded-xl border border-slate-200 dark:border-slate-800 max-w-2xl mx-auto">
         {[
           { id: 'email_finder', label: 'Email & Mobile Finder', icon: Search },
           { id: 'spam_checker', label: 'Cold Email Spam Checker', icon: Mail },
@@ -288,13 +288,13 @@ Marcus`);
               key={t.id}
               type="button"
               onClick={() => setActiveTool(t.id as any)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold border transition cursor-pointer ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition cursor-pointer ${
                 isActive
-                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20'
-                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                  ? 'bg-slate-900 dark:bg-slate-800 text-white font-semibold shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800/50'
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5" />
               <span>{t.label}</span>
             </button>
           );
@@ -303,10 +303,10 @@ Marcus`);
 
       {/* Tool 1: Email & Mobile Finder */}
       {activeTool === 'email_finder' && (
-        <div className="max-w-3xl mx-auto bg-white dark:bg-[#0c1220] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-sm space-y-6 animate-fadeIn">
+        <div className="max-w-3xl mx-auto bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-6 animate-fadeIn">
           <div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Search className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <Search className="w-4 h-4 text-slate-700 dark:text-slate-300" />
               <span>Decision-Maker Pattern &amp; Deliverability Scanner</span>
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -316,7 +316,7 @@ Marcus`);
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 Target Company Domain
               </label>
               <input
@@ -324,12 +324,12 @@ Marcus`);
                 value={targetDomain}
                 onChange={e => setTargetDomain(e.target.value)}
                 placeholder="e.g. stripe.com or ramp.com"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-600 focus:ring-2 focus:ring-slate-900/5 dark:focus:ring-white/5 transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 Target Title / Persona
               </label>
               <input
@@ -337,7 +337,7 @@ Marcus`);
                 value={targetRole}
                 onChange={e => setTargetRole(e.target.value)}
                 placeholder="e.g. VP Sales, CTO, CMO"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-600 focus:ring-2 focus:ring-slate-900/5 dark:focus:ring-white/5 transition"
               />
             </div>
           </div>
@@ -347,7 +347,7 @@ Marcus`);
               type="button"
               disabled={findingEmail}
               onClick={handleRunEmailFinder}
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer flex items-center gap-2"
+              className="px-5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition cursor-pointer flex items-center gap-2"
             >
               {findingEmail ? (
                 <>
@@ -356,7 +356,7 @@ Marcus`);
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Sparkles className="w-3.5 h-3.5 text-slate-300" />
                   <span>Find Verified Patterns</span>
                 </>
               )}
@@ -364,39 +364,39 @@ Marcus`);
           </div>
 
           {emailResult && (
-            <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-500/20 space-y-3">
+            <div className="p-4 rounded-xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                   <span>Primary Verified Email Pattern:</span>
-                  <span className="font-mono px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-[11px]">
+                  <span className="font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold text-[11px] border border-slate-200 dark:border-slate-700">
                     {emailResult.pattern || emailResult.patterns?.[0]}
                   </span>
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-semibold border border-emerald-500/20">
                   {emailResult.deliverabilityConfidence}% Confidence
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10">
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <span className="text-[10px] text-slate-400 block font-mono">Sample Verified Contact</span>
-                  <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 block">
+                  <span className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100 mt-0.5 block">
                     {emailResult.sampleEmail}
                   </span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10">
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <span className="text-[10px] text-slate-400 block font-mono">Mobile / Direct Dial</span>
-                  <span className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300 mt-0.5 block">
+                  <span className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300 mt-0.5 block">
                     {emailResult.phoneFormat}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono pt-1">
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono pt-1 border-t border-slate-100 dark:border-slate-800">
                 <span>MX: {emailResult.mxStatus}</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold">{emailResult.lineStatus || 'Direct Dial & Mobile Carrier Active'}</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium">{emailResult.lineStatus || 'Direct Dial & Mobile Carrier Active'}</span>
               </div>
             </div>
           )}
@@ -405,10 +405,10 @@ Marcus`);
 
       {/* Tool 2: Spam Checker */}
       {activeTool === 'spam_checker' && (
-        <div className="max-w-3xl mx-auto bg-white dark:bg-[#0c1220] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-sm space-y-5 animate-fadeIn">
+        <div className="max-w-3xl mx-auto bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-5 animate-fadeIn">
           <div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Mail className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <Mail className="w-4 h-4 text-slate-700 dark:text-slate-300" />
               <span>Cold Email Deliverability &amp; Spam Trigger Analyzer</span>
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -417,26 +417,26 @@ Marcus`);
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
               Subject Line
             </label>
             <input
               type="text"
               value={emailSubject}
               onChange={e => setEmailSubject(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-600 focus:ring-2 focus:ring-slate-900/5 dark:focus:ring-white/5 transition"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
               Email Body
             </label>
             <textarea
               rows={6}
               value={emailBody}
               onChange={e => setEmailBody(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500 resize-none font-mono"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-600 focus:ring-2 focus:ring-slate-900/5 dark:focus:ring-white/5 transition resize-none font-mono"
             />
           </div>
 
@@ -445,7 +445,7 @@ Marcus`);
               type="button"
               disabled={analyzingSpam}
               onClick={handleRunSpamCheck}
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer flex items-center gap-2"
+              className="px-5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition cursor-pointer flex items-center gap-2"
             >
               {analyzingSpam ? (
                 <>
@@ -454,7 +454,7 @@ Marcus`);
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-slate-300" />
                   <span>Analyze Deliverability Score</span>
                 </>
               )}
@@ -462,13 +462,13 @@ Marcus`);
           </div>
 
           {spamScore && (
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 space-y-3">
+            <div className="p-4 rounded-xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Deliverability Grade</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Deliverability Grade</span>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-2xl font-black text-emerald-500 font-mono">{spamScore.grade}</span>
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">({spamScore.score}/100 Score)</span>
+                    <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">{spamScore.grade}</span>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">({spamScore.score}/100 Score)</span>
                   </div>
                 </div>
 
@@ -479,14 +479,14 @@ Marcus`);
               </div>
 
               {spamScore.flaggedWords && spamScore.flaggedWords.length > 0 && (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400">
-                  <span className="font-bold flex items-center gap-1.5 mb-1.5">
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400">
+                  <span className="font-semibold flex items-center gap-1.5 mb-1.5">
                     <AlertTriangle className="w-3.5 h-3.5" />
                     <span>Detected Spam Trigger Words:</span>
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {spamScore.flaggedWords.map((word, idx) => (
-                      <span key={idx} className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono text-[11px] font-bold">
+                      <span key={idx} className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono text-[11px] font-semibold">
                         "{word}"
                       </span>
                     ))}
@@ -494,8 +494,8 @@ Marcus`);
                 </div>
               )}
 
-              <div className="pt-2 border-t border-slate-200 dark:border-white/10 space-y-1.5">
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                   LeadFlow Deliverability Recommendations:
                 </span>
                 {spamScore.recommendations.map((rec, i) => (
@@ -512,10 +512,10 @@ Marcus`);
 
       {/* Tool 3: LinkedIn Hook Generator */}
       {activeTool === 'hook_optimizer' && (
-        <div className="max-w-3xl mx-auto bg-white dark:bg-[#0c1220] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-sm space-y-5 animate-fadeIn">
+        <div className="max-w-3xl mx-auto bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-5 animate-fadeIn">
           <div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Linkedin className="w-4 h-4 text-blue-600" />
+            <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <Linkedin className="w-4 h-4 text-slate-700 dark:text-slate-300" />
               <span>LinkedIn B2B Outreach &amp; Thought Leadership Hook Generator</span>
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -525,7 +525,7 @@ Marcus`);
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 Target Persona
               </label>
               <input
@@ -533,12 +533,12 @@ Marcus`);
                 value={targetPersona}
                 onChange={e => setTargetPersona(e.target.value)}
                 placeholder="e.g. VP of Sales, CTO, CMO"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-600 focus:ring-2 focus:ring-slate-900/5 dark:focus:ring-white/5 transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 Value Proposition / Topic Angle
               </label>
               <input
@@ -546,7 +546,7 @@ Marcus`);
                 value={hookTopic}
                 onChange={e => setHookTopic(e.target.value)}
                 placeholder="e.g. Why cold calling is dead or Managed appointment setting"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-600 focus:ring-2 focus:ring-slate-900/5 dark:focus:ring-white/5 transition"
               />
             </div>
           </div>
@@ -556,7 +556,7 @@ Marcus`);
               type="button"
               disabled={generatingHook}
               onClick={handleRunHookGenerator}
-              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition cursor-pointer flex items-center gap-2"
+              className="px-5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition cursor-pointer flex items-center gap-2"
             >
               {generatingHook ? (
                 <>
@@ -565,7 +565,7 @@ Marcus`);
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Sparkles className="w-3.5 h-3.5 text-slate-300" />
                   <span>Generate 3 LinkedIn Hooks</span>
                 </>
               )}
@@ -574,14 +574,14 @@ Marcus`);
 
           <div className="space-y-3 pt-2">
             {hooksList.map((hk, i) => (
-              <div key={i} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 flex items-start justify-between gap-4">
+              <div key={i} className="p-4 rounded-xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4 shadow-2xs">
                 <p className="text-xs text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed font-sans">
                   {hk}
                 </p>
                 <button
                   type="button"
                   onClick={() => handleCopy(hk, `hook_${i}`)}
-                  className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-500 hover:text-slate-900 dark:hover:text-white transition shrink-0 cursor-pointer"
+                  className="p-1.5 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition shrink-0 cursor-pointer"
                   title="Copy Hook"
                 >
                   {copiedKey === `hook_${i}` ? (
@@ -598,9 +598,9 @@ Marcus`);
 
       {/* Tool 4: Intent Scanner */}
       {activeTool === 'intent_scanner' && (
-        <div className="max-w-3xl mx-auto bg-white dark:bg-[#0c1220] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-sm space-y-5 animate-fadeIn">
+        <div className="max-w-3xl mx-auto bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-5 animate-fadeIn">
           <div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <Flame className="w-4 h-4 text-amber-500" />
               <span>ICP Intent Signal &amp; Trigger Event Analyzer</span>
             </h4>
@@ -615,13 +615,13 @@ Marcus`);
               value={intentCompany}
               onChange={e => setIntentCompany(e.target.value)}
               placeholder="e.g. Fintech / Enterprise Payments or stripe.com"
-              className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500"
+              className="flex-1 px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-600 focus:ring-2 focus:ring-slate-900/5 dark:focus:ring-white/5 transition"
             />
             <button
               type="button"
               disabled={scanningIntent}
               onClick={handleRunIntentScanner}
-              className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-md transition cursor-pointer flex items-center gap-2 shrink-0 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition cursor-pointer flex items-center gap-2 shrink-0 disabled:opacity-50"
             >
               {scanningIntent ? (
                 <>
@@ -630,21 +630,21 @@ Marcus`);
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Sparkles className="w-3.5 h-3.5 text-slate-300" />
                   <span>Scan Real-Time Intent</span>
                 </>
               )}
             </button>
           </div>
 
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300">
+          <div className="p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300">
             <strong>Why intent signals matter:</strong> Prospects reached within 14 days of an executive hire or funding round exhibit a <strong>3.4x higher meeting conversion rate</strong> than cold static databases.
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 space-y-3">
+          <div className="p-4 rounded-xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 space-y-3 shadow-2xs">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-slate-900 dark:text-white">Active Signal Feeds:</span>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-mono text-[10px] font-bold">
+              <span className="font-semibold text-slate-900 dark:text-white">Active Signal Feeds:</span>
+              <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-semibold border border-emerald-500/20">
                 {intentResults.intentLevel} Buying Intent
               </span>
             </div>
@@ -652,7 +652,7 @@ Marcus`);
             <div className="space-y-2">
               {intentResults.signals.map((sig, i) => (
                 <div key={i} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                   <span>{sig}</span>
                 </div>
               ))}
@@ -662,11 +662,11 @@ Marcus`);
             {(intentResults.recentHirings || intentResults.fundingStatus || intentResults.techStackChanges) && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {intentResults.recentHirings && intentResults.recentHirings.length > 0 && (
-                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase font-mono block mb-1">Recent Hiring Triggers</span>
+                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase font-mono block mb-1">Recent Hiring Triggers</span>
                     <div className="flex flex-wrap gap-1">
                       {intentResults.recentHirings.map((h, idx) => (
-                        <span key={idx} className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] font-bold">
+                        <span key={idx} className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[10px] font-medium border border-slate-200 dark:border-slate-700">
                           {h}
                         </span>
                       ))}
@@ -675,17 +675,17 @@ Marcus`);
                 )}
 
                 {intentResults.fundingStatus && (
-                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase font-mono block mb-1">Funding &amp; Capital Momentum</span>
+                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase font-mono block mb-1">Funding &amp; Capital Momentum</span>
                     <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400" dangerouslySetInnerHTML={{ __html: intentResults.fundingStatus }} />
                   </div>
                 )}
               </div>
             )}
 
-            <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <div className="flex-1">
-                <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 block mb-0.5">
+                <span className="text-[11px] font-semibold text-slate-900 dark:text-slate-200 block mb-0.5">
                   Recommended Outbound Angle:
                 </span>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">
@@ -693,7 +693,7 @@ Marcus`);
                 </p>
               </div>
               {intentResults.provider && (
-                <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-mono shrink-0">
+                <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-mono shrink-0 border border-slate-200 dark:border-slate-700">
                   {intentResults.provider}
                 </span>
               )}
@@ -707,9 +707,9 @@ Marcus`);
         <button
           type="button"
           onClick={onBookCall}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90 transition cursor-pointer shadow-md"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-semibold transition cursor-pointer shadow-xs border border-slate-800 dark:border-slate-700"
         >
-          <span>Want LeadFlow to run all of this for you? Book a 30-min fit call</span>
+          <span>Want LeadFlow to manage and execute this outbound engine for you? Book a 30-min fit call</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

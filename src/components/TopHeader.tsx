@@ -66,12 +66,12 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
   const currentViewMeta = tabTitles[activeTab] || { title: 'Operations Dashboard', subtitle: 'Client Operations Suite' };
 
   return (
-    <header className="sticky top-0 z-30 h-16 border-b border-slate-200 dark:border-white/[0.08] bg-white/90 dark:bg-[#070a12]/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 h-16 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0a192f]/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
       {/* Left: Mobile Toggle & Page Title & Tenant Switcher */}
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileSidebar}
-          className="lg:hidden p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition"
+          className="lg:hidden p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
           aria-label="Open Navigation Sidebar"
         >
           <Menu className="w-5 h-5" />
@@ -82,10 +82,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         </div>
 
         <div>
-          <h1 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
             {currentViewMeta.title}
           </h1>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block font-normal">
             {currentViewMeta.subtitle}
           </p>
         </div>
@@ -97,27 +97,27 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         {/* Global Command Palette Launcher (⌘K) */}
         <button
           onClick={() => setIsCommandPaletteOpen(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer text-xs"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-xs"
           title="Global Command Palette (Ctrl+K / ⌘K)"
         >
           <Search className="w-3.5 h-3.5 text-slate-400" />
           <span className="hidden xl:inline text-[11px] text-slate-500 dark:text-slate-400">Search commands...</span>
-          <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-[9px] font-mono text-slate-500 font-bold">⌘K</kbd>
+          <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[9px] font-mono text-slate-500 font-semibold">⌘K</kbd>
         </button>
 
         {/* AI Creative Studio & Media Vault Button */}
         <button
           onClick={() => setIsCreativeStudioOpen(true)}
-          className="p-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 transition cursor-pointer"
+          className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
           title="AI Creative Studio & Media Vault"
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="w-4 h-4 text-slate-600 dark:text-slate-400" />
         </button>
 
         {/* Global Wiki Button */}
         <button
           onClick={() => setIsWikiModalOpen(true)}
-          className="p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer"
+          className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
           title="Company Wiki & Knowledge Base"
         >
           <BookOpen className="w-4 h-4" />
@@ -126,12 +126,12 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         {/* Real-Time Activity Feed Bell */}
         <button
           onClick={() => setIsActivityFeedOpen(true)}
-          className="relative p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer"
+          className="relative p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
           title="Activity Feed & Live Stream"
         >
           <Bell className="w-4 h-4" />
           {unreadActivityCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-mono font-bold flex items-center justify-center animate-pulse">
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] font-mono font-bold flex items-center justify-center">
               {unreadActivityCount}
             </span>
           )}
@@ -140,7 +140,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         {/* Platform Health Monitor */}
         <button
           onClick={() => setIsPlatformHealthModalOpen(true)}
-          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold hover:bg-emerald-500/20 transition cursor-pointer"
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-medium hover:bg-emerald-500/20 transition cursor-pointer"
           title="External APIs Health Monitor"
         >
           <Activity className="w-3.5 h-3.5" />
@@ -150,10 +150,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         {/* LeadFlow Agency GTM Portal Quick Button */}
         <button
           onClick={() => setActiveTab('leadflow')}
-          className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-xs font-bold transition cursor-pointer"
+          className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-medium transition cursor-pointer"
           title="View LeadFlow Agency Public Website"
         >
-          <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+          <Sparkles className="w-3.5 h-3.5 text-slate-500" />
           <span>LeadFlow Site</span>
         </button>
 
@@ -161,12 +161,12 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         <ThemeToggle variant="compact" />
 
         {/* Currency Quick Switcher */}
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900/80 text-xs font-semibold">
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 text-xs font-medium">
           <Coins className="w-3.5 h-3.5 text-amber-500" />
           <select
             value={currency}
             onChange={e => setCurrency(e.target.value as SupportedCurrency)}
-            className="bg-transparent text-slate-800 dark:text-slate-200 text-xs font-bold focus:outline-hidden cursor-pointer"
+            className="bg-transparent text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-hidden cursor-pointer"
           >
             <option value="USD">USD ($)</option>
             <option value="GBP">GBP (£)</option>
@@ -180,13 +180,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         {firebaseUser ? (
           <button
             onClick={() => setIsAuthModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-600/15 text-emerald-700 dark:text-emerald-300 text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-600/25 transition cursor-pointer"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-600/15 text-emerald-700 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-600/25 transition cursor-pointer"
             title={`Firebase Verified: ${firebaseUser.email}`}
           >
             {firebaseUser.photoURL ? (
               <img src={firebaseUser.photoURL} alt="Google" className="w-4 h-4 rounded-full" />
             ) : (
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
             )}
             <span className="font-mono text-[11px] truncate max-w-[110px]">{firebaseUser.displayName || firebaseUser.email}</span>
             <span className="text-[9px] uppercase font-mono px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Firebase</span>
@@ -194,7 +194,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         ) : (
           <button
             onClick={() => setIsAuthModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shadow-2xs"
             title="Sign in with Google Firebase"
           >
             <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
@@ -210,12 +210,12 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         {/* Role Switcher Pill */}
         <button
           onClick={() => setIsAuthModalOpen(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-indigo-500/30 bg-indigo-50 dark:bg-indigo-600/15 text-indigo-700 dark:text-indigo-300 text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-600/25 transition cursor-pointer"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
           title="Click to switch persona role"
         >
-          <User className="w-3.5 h-3.5 text-indigo-500" />
+          <User className="w-3.5 h-3.5 text-slate-500" />
           <span className="capitalize">{role.replace('_', ' ')}</span>
-          <ChevronDown className="w-3 h-3 text-indigo-400" />
+          <ChevronDown className="w-3 h-3 text-slate-400" />
         </button>
       </div>
     </header>

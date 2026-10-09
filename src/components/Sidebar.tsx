@@ -112,47 +112,47 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
         id="app-left-sidebar"
         className={`fixed top-0 left-0 bottom-0 z-50 w-72 flex flex-col justify-between transition-transform duration-300 ease-in-out border-r
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          bg-white dark:bg-[#080c16] border-slate-200 dark:border-white/[0.08] shadow-2xl lg:shadow-none`}
+          bg-white dark:bg-[#0a192f] border-slate-200 dark:border-slate-800 shadow-lg lg:shadow-none`}
       >
         {/* Top: Brand Header */}
-        <div className="p-4 border-b border-slate-200 dark:border-white/[0.08]">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between">
             <div 
               className="flex items-center gap-2.5 cursor-pointer"
               onClick={() => handleNavClick('pipeline')}
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-indigo-700 p-0.5 shadow-md shadow-indigo-600/25 flex items-center justify-center">
-                <img src="/icon.svg" alt="ALM Nexus" className="w-7 h-7 rounded-lg" />
+              <div className="w-9 h-9 rounded-lg bg-slate-900 dark:bg-slate-800 border border-slate-700 p-0.5 shadow-xs flex items-center justify-center">
+                <img src="/icon.svg" alt="ALM Nexus" className="w-7 h-7 rounded-md" />
               </div>
               <div className="truncate max-w-[170px]">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white truncate">
+                  <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white truncate">
                     {currentTenant?.name || 'ALM Nexus'}
                   </span>
-                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-mono shrink-0">
+                  <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono shrink-0">
                     SaaS
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block -mt-0.5 truncate">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block -mt-0.5 truncate font-medium">
                   Enterprise Operations Hub
                 </span>
               </div>
             </div>
 
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="System Operational" />
+            <span className="w-2 h-2 rounded-full bg-emerald-500" title="System Operational" />
           </div>
 
           {/* Active Persona / Role Badge Card */}
-          <div className="mt-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/5 flex items-center justify-between">
+          <div className="mt-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2 overflow-hidden">
-              <div className="w-7 h-7 rounded-lg bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-bold text-xs shrink-0">
+              <div className="w-7 h-7 rounded-md bg-slate-900 text-white dark:bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
                 {currentUser?.name ? currentUser.name[0] : (role === 'client_guest' ? 'C' : 'A')}
               </div>
               <div className="truncate">
-                <span className="text-xs font-bold text-slate-900 dark:text-white block truncate">
+                <span className="text-xs font-semibold text-slate-900 dark:text-white block truncate">
                   {currentUser ? currentUser.name : (role === 'client_guest' ? 'Client Guest' : 'Tariq Mehmood')}
                 </span>
-                <span className={`inline-block px-1.5 py-0.2 rounded text-[9px] font-bold border font-mono ${currentRoleInfo.badgeClass}`}>
+                <span className={`inline-block px-1.5 py-0.2 rounded text-[9px] font-semibold border font-mono ${currentRoleInfo.badgeClass}`}>
                   {currentRoleInfo.title}
                 </span>
               </div>
@@ -160,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
 
             <button
               onClick={() => setIsAuthModalOpen(true)}
-              className="px-2 py-1 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold border border-indigo-500/20 transition cursor-pointer shrink-0"
+              className="px-2 py-1 rounded-md bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold border border-slate-300 dark:border-slate-700 transition cursor-pointer shrink-0"
               title="Switch user role or log in"
             >
               Role
@@ -174,7 +174,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
             <button
               id="btn-sidebar-new-lead"
               onClick={() => setIsNewLeadModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>New Client Lead</span>
@@ -184,9 +184,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
               <button
                 id="btn-sidebar-ai-pitch"
                 onClick={() => openAIModal()}
-                className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-white/10 transition cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-800 transition cursor-pointer shadow-2xs"
               >
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+                <Sparkles className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                 <span>AI Proposal &amp; Pitch</span>
               </button>
             )}
@@ -210,10 +210,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
                 key={item.id}
                 id={`sidebar-nav-${item.id}`}
                 onClick={() => handleNavClick(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-indigo-600 text-white shadow-sm font-bold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                    ? 'bg-slate-900 dark:bg-slate-800 text-white font-semibold shadow-xs border border-slate-800 dark:border-slate-700'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -222,10 +222,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
                 </div>
 
                 {item.badge !== undefined && (
-                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold font-mono ${
+                  <span className={`px-1.5 py-0.2 rounded text-[10px] font-semibold font-mono ${
                     isActive 
                       ? 'bg-white/20 text-white' 
-                      : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-300'
+                      : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                   }`}>
                     {item.badge}
                   </span>
@@ -236,13 +236,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
         </nav>
 
         {/* Bottom Section: Theme Toggle, Telemetry, and Logout */}
-        <div className="p-3 border-t border-slate-200 dark:border-white/[0.08] space-y-2 bg-slate-50/50 dark:bg-[#070a12]/50">
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-2 bg-slate-50 dark:bg-[#0a192f]">
           
           {/* Real Light / Dark / System Mode Switcher */}
-          <div className="flex flex-col gap-1.5 p-2 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-white/10">
-            <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+          <div className="flex flex-col gap-1.5 p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+            <div className="flex items-center justify-between text-[11px] font-medium text-slate-700 dark:text-slate-300">
               <span className="flex items-center gap-1.5">
-                {isDark ? <Moon className="w-3.5 h-3.5 text-indigo-400" /> : <Sun className="w-3.5 h-3.5 text-amber-500" />}
+                {isDark ? <Moon className="w-3.5 h-3.5 text-slate-300" /> : <Sun className="w-3.5 h-3.5 text-amber-500" />}
                 <span>Theme Mode</span>
               </span>
               <span className="text-[10px] font-mono uppercase text-slate-400">
@@ -256,7 +256,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
           <div className="flex items-center justify-between text-xs px-1">
             <button
               onClick={() => setIsTestModalOpen(true)}
-              className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 font-mono font-semibold"
+              className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 font-mono font-medium"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>SOP Tests 17/17</span>
@@ -266,7 +266,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
               onClick={() => setIsDatabaseModalOpen(true)}
               className="text-[11px] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1 font-mono"
             >
-              <Database className="w-3.5 h-3.5 text-cyan-500" />
+              <Database className="w-3.5 h-3.5 text-slate-400" />
               <span>{databaseStatus?.engine === 'postgresql' ? 'PostgreSQL' : 'JSON DB'}</span>
             </button>
           </div>
@@ -276,7 +276,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
             {currentUser ? (
               <button
                 onClick={logout}
-                className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-semibold transition cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-semibold transition cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Sign Out ({currentUser.name.split(' ')[0]})</span>
@@ -284,7 +284,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Sign In / Select Role</span>

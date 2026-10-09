@@ -123,27 +123,27 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
   };
 
   return (
-    <div className="w-full bg-white dark:bg-[#0c1220] border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl shadow-slate-900/5">
+    <div className="w-full bg-white dark:bg-[#0a192f] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 lg:p-10 shadow-sm">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
         
         {/* Left: Interactive Controls */}
         <div className="w-full lg:w-1/2 space-y-6">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50 text-xs font-bold font-mono mb-2">
-              <Calculator className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold font-mono mb-2">
+              <Calculator className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>OUTBOUND ROI SIMULATOR</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
               Calculate Your Revenue Velocity
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-normal">
               Adjust parameters based on your business model to see projected qualified meetings and net revenue multiple.
             </p>
           </div>
 
           {/* Industry Preset */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
               Business Model &amp; ICP Target
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -156,14 +156,14 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
                   key={ind.id}
                   type="button"
                   onClick={() => setSelectedIndustry(ind.id as any)}
-                  className={`p-3 rounded-2xl border text-left transition cursor-pointer ${
+                  className={`p-3 rounded-lg border text-left transition cursor-pointer ${
                     selectedIndustry === ind.id
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20'
-                      : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-indigo-400'
+                      ? 'bg-slate-900 dark:bg-slate-800 text-white border-slate-900 dark:border-slate-700 shadow-xs'
+                      : 'bg-slate-50 dark:bg-slate-850 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-600'
                   }`}
                 >
-                  <span className="block text-xs font-bold">{ind.label}</span>
-                  <span className={`text-[10px] block mt-0.5 ${selectedIndustry === ind.id ? 'text-indigo-100' : 'text-slate-400'}`}>
+                  <span className="block text-xs font-semibold">{ind.label}</span>
+                  <span className={`text-[10px] block mt-0.5 ${selectedIndustry === ind.id ? 'text-slate-300' : 'text-slate-400'}`}>
                     {ind.desc}
                   </span>
                 </button>
@@ -173,9 +173,9 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
 
           {/* Slider 1: Average Deal Size */}
           <div>
-            <div className="flex justify-between items-center mb-2 text-xs font-bold">
+            <div className="flex justify-between items-center mb-2 text-xs font-semibold">
               <span className="text-slate-700 dark:text-slate-300">Average Deal Size (ACV):</span>
-              <span className="font-mono text-base text-indigo-600 dark:text-indigo-400">
+              <span className="font-mono text-base font-bold text-slate-900 dark:text-white tabular-nums">
                 ${dealSize.toLocaleString()}
               </span>
             </div>
@@ -186,7 +186,7 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
               step={500}
               value={dealSize}
               onChange={e => setDealSize(Number(e.target.value))}
-              className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-slate-900 dark:accent-slate-400"
             />
             <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
               <span>$1.5k</span>
@@ -197,10 +197,10 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
 
           {/* Slider 2: Monthly Prospects Outreached */}
           <div>
-            <div className="flex justify-between items-center mb-2 text-xs font-bold">
+            <div className="flex justify-between items-center mb-2 text-xs font-semibold">
               <span className="text-slate-700 dark:text-slate-300">Monthly Prospect Volume:</span>
-              <span className="font-mono text-base text-indigo-600 dark:text-indigo-400">
-                {prospectsPerMonth.toLocaleString()} verified contacts
+              <span className="font-mono text-base font-bold text-slate-900 dark:text-white tabular-nums">
+                {prospectsPerMonth.toLocaleString()} contacts
               </span>
             </div>
             <input
@@ -210,7 +210,7 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
               step={500}
               value={prospectsPerMonth}
               onChange={e => setProspectsPerMonth(Number(e.target.value))}
-              className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-slate-900 dark:accent-slate-400"
             />
             <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
               <span>1,000 (Pilot)</span>
@@ -221,9 +221,9 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
 
           {/* Slider 3: Close Rate */}
           <div>
-            <div className="flex justify-between items-center mb-2 text-xs font-bold">
+            <div className="flex justify-between items-center mb-2 text-xs font-semibold">
               <span className="text-slate-700 dark:text-slate-300">Your Sales Closing Rate:</span>
-              <span className="font-mono text-base text-indigo-600 dark:text-indigo-400">
+              <span className="font-mono text-base font-bold text-slate-900 dark:text-white tabular-nums">
                 {closeRatePercent}%
               </span>
             </div>
@@ -234,7 +234,7 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
               step={5}
               value={closeRatePercent}
               onChange={e => setCloseRatePercent(Number(e.target.value))}
-              className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-slate-900 dark:accent-slate-400"
             />
             <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
               <span>10% (Conservative)</span>
@@ -245,59 +245,59 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
         </div>
 
         {/* Right: Projected Metrics Display Card */}
-        <div className="w-full lg:w-1/2 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-indigo-900/20 via-slate-900/40 to-slate-900/80 border border-indigo-500/20 shadow-xl flex flex-col justify-between">
+        <div className="w-full lg:w-1/2 p-6 sm:p-8 rounded-xl bg-slate-900 text-white border border-slate-800 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <span className="text-xs uppercase font-mono font-bold tracking-wider text-indigo-400">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <span className="text-xs uppercase font-mono font-semibold tracking-wider text-slate-300">
                 Projected 30-Day Output
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold font-mono border border-emerald-500/20">
+              <span className="px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-semibold font-mono border border-emerald-500/20">
                 {roiMultiple}x Est. ROI
               </span>
             </div>
 
             {/* Key Stat Highlights */}
-            <div className="grid grid-cols-2 gap-4 my-6">
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+            <div className="grid grid-cols-2 gap-3.5 my-6">
+              <div className="p-4 rounded-lg bg-slate-800/80 border border-slate-700/60">
                 <span className="text-xs text-slate-400 block font-medium">Qualified SQLs</span>
-                <span className="text-2xl sm:text-3xl font-black text-white font-mono mt-1 block">
+                <span className="text-2xl sm:text-3xl font-bold text-white font-mono mt-1 block tabular-nums">
                   {projectedMeetings}
                 </span>
-                <span className="text-[10px] text-indigo-300 font-mono">meetings on your calendar</span>
+                <span className="text-[10px] text-slate-300 font-mono">meetings on calendar</span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+              <div className="p-4 rounded-lg bg-slate-800/80 border border-slate-700/60">
                 <span className="text-xs text-slate-400 block font-medium">Pipeline Generated</span>
-                <span className="text-2xl sm:text-3xl font-black text-indigo-400 font-mono mt-1 block">
+                <span className="text-2xl sm:text-3xl font-bold text-slate-200 font-mono mt-1 block tabular-nums">
                   ${(monthlyPipeline / 1000).toFixed(0)}k
                 </span>
-                <span className="text-[10px] text-slate-400 font-mono">in deal opportunity</span>
+                <span className="text-[10px] text-slate-400 font-mono">deal opportunity</span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+              <div className="p-4 rounded-lg bg-slate-800/80 border border-slate-700/60">
                 <span className="text-xs text-slate-400 block font-medium">Deals Closed</span>
-                <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono mt-1 block">
+                <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono mt-1 block tabular-nums">
                   {projectedDeals}
                 </span>
                 <span className="text-[10px] text-slate-400 font-mono">at {closeRatePercent}% closing</span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+              <div className="p-4 rounded-lg bg-slate-800/80 border border-slate-700/60">
                 <span className="text-xs text-slate-400 block font-medium">Projected Revenue</span>
-                <span className="text-2xl sm:text-3xl font-black text-emerald-300 font-mono mt-1 block">
+                <span className="text-2xl sm:text-3xl font-bold text-emerald-300 font-mono mt-1 block tabular-nums">
                   ${(projectedRevenue / 1000).toFixed(0)}k
                 </span>
-                <span className="text-[10px] text-emerald-400 font-mono">+${(netProfit / 1000).toFixed(0)}k net profit</span>
+                <span className="text-[10px] text-emerald-400 font-mono">+${(netProfit / 1000).toFixed(0)}k net</span>
               </div>
             </div>
 
             {/* In-House SDR Comparison Banner */}
-            <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs space-y-1.5 mb-6">
+            <div className="p-4 rounded-lg bg-slate-800/70 border border-slate-700/80 text-xs space-y-1.5 mb-6">
               <div className="flex items-center justify-between">
-                <span className="text-slate-300 font-bold">LeadFlow vs. Hiring In-House SDR:</span>
-                <span className="text-emerald-400 font-mono font-bold">${monthlySavingsVsSdr.toLocaleString()}/mo Saved</span>
+                <span className="text-slate-300 font-semibold">LeadFlow vs. Hiring In-House SDR:</span>
+                <span className="text-emerald-400 font-mono font-semibold">${monthlySavingsVsSdr.toLocaleString()}/mo Saved</span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
+              <p className="text-[11px] text-slate-400 leading-relaxed font-normal">
                 Hiring 1 full-time SDR typically costs <strong>$8,500/mo</strong> (base salary + recruitment fees + software licenses for SalesNav, Apollo, Clay, warmup) with 3 months ramp time. LeadFlow delivers a complete multi-channel team in <strong>7 days</strong> for <strong>${estimatedCost.toLocaleString()}/mo</strong>.
               </p>
             </div>
@@ -310,18 +310,18 @@ export const LeadFlowRoiCalculator: React.FC<LeadFlowRoiCalculatorProps> = ({ on
                 setEmailSentSuccess(false);
                 setIsEmailGateOpen(true);
               }}
-              className="flex-1 py-3.5 px-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 hover:border-indigo-500 text-slate-800 dark:text-white text-xs sm:text-sm font-bold transition cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+              className="flex-1 py-3 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center justify-center gap-2 shadow-xs"
             >
-              <Mail className="w-4 h-4 text-indigo-500" />
-              <span>Email Me My ROI Breakdown</span>
+              <Mail className="w-4 h-4 text-slate-300" />
+              <span>Email My Breakdown</span>
             </button>
 
             <button
               type="button"
               onClick={onBookCall}
-              className="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center gap-2"
+              className="flex-1 py-3 px-5 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer flex items-center justify-center gap-2"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-slate-700" />
               <span>Book Strategy Call</span>
               <ArrowRight className="w-4 h-4" />
             </button>
