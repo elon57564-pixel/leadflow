@@ -366,15 +366,15 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
     <div className="min-h-screen bg-slate-50 dark:bg-[#0a192f] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-slate-900 selection:text-white transition-colors duration-200">
       
       {/* ========================================================
-          STICKY TOP NAVBAR (Enterprise Deep Navy / Midnight Blue)
+          STICKY TOP NAVBAR (Enterprise Antigravity Glass)
       ======================================================== */}
-      <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-slate-900 text-white dark:bg-[#0a192f] border-b border-slate-800 transition-all shadow-xs">
+      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-slate-900/95 text-white dark:bg-[#070e1b]/90 border-b border-slate-800/80 dark:border-white/10 transition-all shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
           {/* Logo & Product Badge */}
           <div className="flex items-center gap-3">
             <a href="#" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 p-0.5 shadow-xs flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-slate-800/90 border border-slate-700/80 p-0.5 shadow-xs flex items-center justify-center group-hover:border-slate-600 transition-colors">
                 <Send className="w-4 h-4 text-white transform -rotate-12 group-hover:rotate-0 transition-transform duration-300" />
               </div>
               <div>
@@ -382,11 +382,11 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
                   <span className="font-bold text-lg text-white tracking-tight">
                     LeadFlow
                   </span>
-                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono tracking-wide">
                     GTM Engine
                   </span>
                 </div>
-                <span className="text-[10px] font-medium text-slate-400 block -mt-0.5">
+                <span className="text-[10px] font-medium text-slate-400 block -mt-0.5 tracking-tight">
                   An ALM Nexus Product
                 </span>
               </div>
@@ -395,9 +395,9 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
 
           {/* Navigation Links */}
           <nav className="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-300">
-            <a href="#services" className="hover:text-white transition-colors">Services</a>
             <a href="#case-studies" className="hover:text-white transition-colors">Case Studies</a>
             <a href="#fit" className="hover:text-white transition-colors">Honest Fit</a>
+            <a href="#services" className="hover:text-white transition-colors">Services</a>
             <a href="#process" className="hover:text-white transition-colors">7-Day Launch</a>
             <a href="#calculator" className="hover:text-white transition-colors">ROI Calculator</a>
             <a href="#free-tools" className="hover:text-white transition-colors flex items-center gap-1.5">
@@ -416,7 +416,7 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
             <button
               type="button"
               onClick={() => handleOpenBooking()}
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-xs font-semibold shadow-xs transition cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-xs font-semibold shadow-xs transition cursor-pointer hover:shadow-md"
             >
               <Calendar className="w-3.5 h-3.5" />
               <span>Book A Call</span>
@@ -453,26 +453,29 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
       </header>
 
       {/* ========================================================
-          1. HERO SECTION (Clean Enterprise Layout)
+          1. HERO SECTION (Airy, Spacious Google Antigravity Layout)
       ======================================================== */}
-      <section className="relative overflow-hidden pt-12 pb-16 sm:pt-16 sm:pb-20 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0a192f]">
-        {/* Antigravity Interactive Particles (Displayed only in start/hero section) */}
-        <ParticleBackground className="absolute inset-0 z-0" />
+      <section className="relative overflow-hidden pt-16 pb-20 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#070e1b]">
+        {/* Antigravity Interactive Particles (Spacious & Interactive) */}
+        <ParticleBackground className="absolute inset-0 z-0 pointer-events-none" />
+
+        {/* Ambient Subtle Radial Gradient Backdrop for Perfect Contrast */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(56,189,248,0.08),transparent)] pointer-events-none z-1" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
             
             {/* Left Column: Hero Text */}
-            <div className="w-full lg:w-7/12 text-left space-y-6">
+            <div className="w-full lg:w-7/12 text-left space-y-7">
               
               {/* Eyebrow Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold font-mono shadow-2xs">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 text-xs font-semibold font-mono shadow-xs backdrop-blur-md">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>MANAGED LINKEDIN &amp; COLD EMAIL OUTREACH FOR B2B TEAMS</span>
+                <span className="tracking-wide">MANAGED LINKEDIN &amp; COLD EMAIL OUTREACH FOR B2B TEAMS</span>
               </div>
 
               {/* Main Headline */}
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white tracking-tight leading-[1.15]">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.12]">
                 Managed LinkedIn and cold email outreach for B2B teams.
               </h1>
 
@@ -486,7 +489,7 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleOpenBooking()}
-                  className="px-6 py-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer flex items-center justify-center gap-2 group"
+                  className="px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-semibold shadow-sm hover:shadow-md transition cursor-pointer flex items-center justify-center gap-2 group"
                 >
                   <span>Discuss your outbound plan</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -494,7 +497,7 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
 
                 <a
                   href="#case-studies"
-                  className="px-5 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-2xs"
+                  className="px-5 py-3 rounded-xl border border-slate-300 dark:border-white/15 bg-white/80 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-xs backdrop-blur-sm"
                 >
                   <span>See case studies</span>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -509,49 +512,68 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
                       onOpenLoginModal();
                     }
                   }}
-                  className="px-5 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-2xs"
+                  className="px-5 py-3 rounded-xl border border-slate-300 dark:border-white/15 bg-white/80 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-xs backdrop-blur-sm"
                 >
                   <Lock className="w-4 h-4 text-slate-500" />
                   <span>ALM Nexus Workspace</span>
                 </button>
               </div>
 
-              {/* Trust Indicators */}
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                  <Clock className="w-4 h-4 text-slate-500" />
-                  30 minutes to discuss audience &amp; fit
-                </span>
-                <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  7-Day Outbound Launch Sprint
-                </span>
-                <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                  <ShieldCheck className="w-4 h-4 text-slate-500" />
-                  Primary Domain Protection
-                </span>
+              {/* Organized Proof Metric Strip (4 High-Trust Antigravity Cards) */}
+              <div className="pt-6 border-t border-slate-200/80 dark:border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="p-3 rounded-xl bg-white/60 dark:bg-slate-900/40 border border-slate-200/80 dark:border-white/10 backdrop-blur-sm">
+                  <div className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-white">
+                    <Clock className="w-3.5 h-3.5 text-blue-500" />
+                    <span>30-Min Audit</span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">Direct fit review</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white/60 dark:bg-slate-900/40 border border-slate-200/80 dark:border-white/10 backdrop-blur-sm">
+                  <div className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>7-Day Sprint</span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">Live in one week</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white/60 dark:bg-slate-900/40 border border-slate-200/80 dark:border-white/10 backdrop-blur-sm">
+                  <div className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-white">
+                    <ShieldCheck className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>0 Domain Risk</span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">Isolated secondary domains</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white/60 dark:bg-slate-900/40 border border-slate-200/80 dark:border-white/10 backdrop-blur-sm">
+                  <div className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-white">
+                    <Zap className="w-3.5 h-3.5 text-amber-500" />
+                    <span>100% Turnkey</span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">Copy &amp; reply management</span>
+                </div>
               </div>
             </div>
 
             {/* Right Column: Live Outbound Sequence Simulation Card */}
             <div className="w-full lg:w-5/12">
-              <div className="relative rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4">
+              <div className="relative rounded-2xl bg-white/90 dark:bg-slate-900/75 border border-slate-200/80 dark:border-white/10 p-6 sm:p-7 shadow-lg backdrop-blur-md space-y-4">
                 
                 {/* Simulator Card Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-xs font-mono font-semibold text-slate-900 dark:text-white uppercase">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-xs font-mono font-semibold text-slate-900 dark:text-white uppercase tracking-wider">
                       Live Multi-Channel Pipeline
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
                     LeadFlow Engine
                   </span>
                 </div>
 
                 {/* Step 1: Verified Prospect */}
-                <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 space-y-1">
+                <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/5 space-y-1">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-slate-800 dark:text-white flex items-center gap-1.5">
                       <Filter className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
@@ -566,8 +588,8 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
 
                 {/* Step 2: Multi-Touch Touchpoint Flow */}
                 <div className="space-y-2 text-xs">
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 flex items-start gap-2.5">
-                    <Linkedin className="w-4 h-4 text-slate-600 dark:text-slate-400 shrink-0 mt-0.5" />
+                  <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/5 flex items-start gap-2.5">
+                    <Linkedin className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                     <div>
                       <span className="font-semibold text-slate-900 dark:text-white block">
                         Touch 1 &bull; LinkedIn Soft Note
@@ -581,7 +603,7 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 flex items-start gap-2.5">
+                  <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/5 flex items-start gap-2.5">
                     <Mail className="w-4 h-4 text-slate-600 dark:text-slate-400 shrink-0 mt-0.5" />
                     <div>
                       <span className="font-semibold text-slate-900 dark:text-white block">
@@ -595,7 +617,7 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
                 </div>
 
                 {/* Step 3: Meeting Booked Outcome */}
-                <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+                <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold">
                       <Calendar className="w-4 h-4" />
@@ -615,7 +637,7 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
                 </div>
 
                 {/* Footer Metric Row */}
-                <div className="pt-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono border-t border-slate-100 dark:border-slate-800">
+                <div className="pt-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono border-t border-slate-100 dark:border-white/10">
                   <span>Clay + Instantly + Apollo Stack</span>
                   <span className="text-slate-700 dark:text-slate-300 font-medium">100% Handled By LeadFlow</span>
                 </div>
@@ -627,33 +649,70 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
       </section>
 
       {/* ========================================================
+          ANTIGRAVITY STICKY QUICK-NAVIGATION JUMP BAR
+      ======================================================== */}
+      <div className="sticky top-16 z-30 w-full backdrop-blur-xl bg-white/90 dark:bg-[#070e1b]/90 border-b border-slate-200/80 dark:border-white/10 shadow-xs transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 shrink-0 text-xs font-mono font-medium text-slate-500 dark:text-slate-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="uppercase tracking-wider">NAVIGATE:</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <a href="#case-studies" className="px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100/70 dark:bg-white/5 hover:bg-slate-200/70 dark:hover:bg-white/10 border border-slate-200/60 dark:border-white/10 transition">Case Studies</a>
+            <a href="#fit" className="px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100/70 dark:bg-white/5 hover:bg-slate-200/70 dark:hover:bg-white/10 border border-slate-200/60 dark:border-white/10 transition">Honest Fit</a>
+            <a href="#services" className="px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100/70 dark:bg-white/5 hover:bg-slate-200/70 dark:hover:bg-white/10 border border-slate-200/60 dark:border-white/10 transition">Services</a>
+            <a href="#process" className="px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100/70 dark:bg-white/5 hover:bg-slate-200/70 dark:hover:bg-white/10 border border-slate-200/60 dark:border-white/10 transition">7-Day Sprint</a>
+            <a href="#calculator" className="px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100/70 dark:bg-white/5 hover:bg-slate-200/70 dark:hover:bg-white/10 border border-slate-200/60 dark:border-white/10 transition">ROI Calculator</a>
+            <a href="#free-tools" className="px-3 py-1.5 rounded-full text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition flex items-center gap-1.5">
+              <span>Cold Email Sim</span>
+              <span className="text-[9px] font-mono font-bold px-1 py-0.2 rounded bg-emerald-500/20">FREE</span>
+            </a>
+            <a href="#pricing" className="px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100/70 dark:bg-white/5 hover:bg-slate-200/70 dark:hover:bg-white/10 border border-slate-200/60 dark:border-white/10 transition">Pricing</a>
+            <a href="#faq" className="px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100/70 dark:bg-white/5 hover:bg-slate-200/70 dark:hover:bg-white/10 border border-slate-200/60 dark:border-white/10 transition">FAQ</a>
+          </div>
+
+          <div className="hidden md:flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => handleOpenBooking()}
+              className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:opacity-90 transition flex items-center gap-1 shadow-2xs"
+            >
+              <span>Book Call</span>
+              <ArrowUpRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================
           2. CAMPAIGN EXAMPLES & REAL PIPELINE (Case Studies)
       ======================================================== */}
-      <section id="case-studies" className="py-16 sm:py-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a192f]">
+      <section id="case-studies" className="py-20 sm:py-24 border-b border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#070e1b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 block">
-              CAMPAIGN EXAMPLES
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium uppercase tracking-wider text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 mb-3">
+              01 // VERIFIED CAMPAIGNS
             </span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Real campaigns, real pipeline
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 font-normal">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-3 font-normal max-w-xl mx-auto">
               Anonymized case studies from B2B teams we run outbound for — the ICP, the funnel numbers, and the exact multi-channel sequences.
             </p>
           </div>
 
           {/* Case Study Tabs */}
-          <div className="flex items-center justify-center gap-1.5 mb-8 flex-wrap p-1.5 bg-slate-100 dark:bg-slate-850/80 rounded-xl border border-slate-200 dark:border-slate-800 max-w-3xl mx-auto">
+          <div className="flex items-center justify-center gap-1.5 mb-8 flex-wrap p-1.5 bg-slate-100/90 dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-white/10 max-w-3xl mx-auto backdrop-blur-sm">
             {caseStudies.map((cs, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setActiveCaseStudy(idx)}
-                className={`px-3.5 py-2 rounded-lg text-xs font-medium transition cursor-pointer ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-medium transition cursor-pointer ${
                   activeCaseStudy === idx
-                    ? 'bg-slate-900 dark:bg-slate-800 text-white font-semibold shadow-xs'
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800/50'
                 }`}
               >
@@ -666,12 +725,12 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
           {caseStudies[activeCaseStudy] && (() => {
             const cs = caseStudies[activeCaseStudy];
             return (
-              <div className="max-w-5xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 sm:p-10 shadow-sm space-y-8 animate-fadeIn">
+              <div className="max-w-5xl mx-auto bg-white/90 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/10 rounded-2xl p-6 sm:p-10 shadow-sm hover:shadow-md transition-shadow space-y-8 animate-fadeIn backdrop-blur-sm">
                 
                 {/* Header Metrics Banner */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-200/80 dark:border-white/10">
                   <div>
-                    <span className="text-xs font-mono font-semibold text-slate-500 dark:text-slate-400 uppercase">
+                    <span className="text-xs font-mono font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                       {cs.badge}
                     </span>
                     <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-1">
@@ -679,7 +738,7 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
                     </h3>
                   </div>
 
-                  <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 text-right shrink-0">
+                  <div className="p-3.5 rounded-xl bg-slate-50/90 dark:bg-slate-850/70 border border-slate-200/80 dark:border-white/10 text-right shrink-0">
                     <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-mono block">
                       {cs.sqlsMetric}
                     </span>
@@ -754,17 +813,17 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
       {/* ========================================================
           3. HONEST FIT BEFORE WE TALK NUMBERS (Is This For You?)
       ======================================================== */}
-      <section id="fit" className="py-16 sm:py-24 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a192f]">
+      <section id="fit" className="py-20 sm:py-24 border-b border-slate-200/80 dark:border-white/10 bg-slate-50/70 dark:bg-[#060c18]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2 block">
-              IS THIS FOR YOU?
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium uppercase tracking-wider text-slate-600 dark:text-slate-300 bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 mb-3">
+              02 // CANDID AUDIT
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Honest fit before we talk numbers
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-3 font-normal max-w-xl mx-auto">
               We work best with a specific type of team. Pick your closest match — we'll tell you straight when we're not a fit.
             </p>
           </div>
@@ -880,17 +939,17 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
       {/* ========================================================
           4. OUR SERVICES: Everything you need to scale outbound
       ======================================================== */}
-      <section id="services" className="py-16 sm:py-24 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#071324]/50">
+      <section id="services" className="py-20 sm:py-24 border-b border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#070e1b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2 block">
-              OUR SERVICES
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium uppercase tracking-wider text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 mb-3">
+              03 // ARCHITECTURE &amp; DELIVERABLES
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Everything you need to scale outbound
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-3 font-normal max-w-xl mx-auto">
               From data enrichment and technical deliverability to multi-touch messaging and booked meetings on your calendar.
             </p>
           </div>
@@ -988,17 +1047,17 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
       {/* ========================================================
           5. OUR PROCESS: Launch your outbound engine in 7 days
       ======================================================== */}
-      <section id="process" className="py-16 sm:py-24 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0a192f]">
+      <section id="process" className="py-20 sm:py-24 border-b border-slate-200/80 dark:border-white/10 bg-slate-50/70 dark:bg-[#060c18]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2 block">
-              OUR PROCESS
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium uppercase tracking-wider text-slate-600 dark:text-slate-300 bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 mb-3">
+              04 // 7-DAY SPRINT
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Launch your outbound engine in 7 days
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-3 font-normal max-w-xl mx-auto">
               From ICP research to booked meetings — we handle the entire infrastructure so you can focus strictly on closing deals.
             </p>
           </div>
@@ -1097,17 +1156,17 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
       {/* ========================================================
           8. TRANSPARENT PRICING
       ======================================================== */}
-      <section id="pricing" className="py-16 sm:py-24 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#071324]/50">
+      <section id="pricing" className="py-20 sm:py-24 border-b border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#070e1b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2 block">
-              TRANSPARENT PRICING
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium uppercase tracking-wider text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 mb-3">
+              07 // TRANSPARENT PRICING
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Scale your pipeline, not your costs
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-3 font-normal max-w-xl mx-auto">
               Compare managed outbound scopes. Confirm total inclusions and delivery terms before launch.
             </p>
 
@@ -1440,14 +1499,14 @@ export const LeadFlowLandingView: React.FC<LeadFlowLandingViewProps> = ({
       {/* ========================================================
           10. COMMON QUESTIONS (FAQ Accordion)
       ======================================================== */}
-      <section id="faq" className="py-16 sm:py-24 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#071324]/50">
+      <section id="faq" className="py-20 sm:py-24 border-b border-slate-200/80 dark:border-white/10 bg-slate-50/70 dark:bg-[#060c18]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2 block">
-              COMMON QUESTIONS
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium uppercase tracking-wider text-slate-600 dark:text-slate-300 bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 mb-3">
+              08 // FREQUENTLY ASKED QUESTIONS
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Everything you need to know
             </h2>
           </div>

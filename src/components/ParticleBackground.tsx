@@ -41,19 +41,20 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
     if (!canvas) return;
 
     // Check dark mode preference
-    const isDarkMode = document.documentElement.classList.contains('dark') || true;
+    const isDarkMode = document.documentElement.classList.contains('dark') || 
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    // Google Antigravity Color Palettes
+    // Google Antigravity Color Palettes (Navy, periwinkle, royal blue, emerald glow)
     const colors = isDarkMode
       ? {
-          c1: [0.443, 0.537, 1.0],   // #7189ff (Antigravity Electric Periwinkle)
+          c1: [0.443, 0.537, 1.0],   // #7189ff (Antigravity Soft Periwinkle Blue)
           c2: [0.188, 0.455, 0.976], // #3074f9 (Antigravity Google Blue)
           c3: [0.063, 0.725, 0.506]  // #10b981 (High-trust Emerald Glow)
         }
       : {
           c1: [0.172, 0.392, 0.929], // #2c64ed (Vibrant Royal)
-          c2: [0.972, 0.258, 0.258], // #f84242 (Google Red)
-          c3: [1.0, 0.812, 0.012]    // #ffcf03 (Google Gold)
+          c2: [0.02, 0.588, 0.412],  // #059669 (Emerald)
+          c3: [0.392, 0.455, 0.545]  // #64748b (Refined Slate)
         };
 
     let gl: WebGLRenderingContext | null = null;
@@ -201,7 +202,7 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
           vSeed = aSeed;
 
           gl_Position = vec4(finalPos.x, finalPos.y, 0.0, 1.0);
-          gl_PointSize = vScale * 14.5 * uParticleScale;
+          gl_PointSize = vScale * 11.5 * uParticleScale;
         }
       `;
 
@@ -240,8 +241,8 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
           // Rotate dash towards ripple wavefront
           uv = rotate(uv, -vAngle);
 
-          // Render pill/capsule shape
-          float rounded = sdRoundBox(uv, vec2(0.36, 0.13), vec4(0.12));
+          // Render pill/capsule shape with crisp curvature
+          float rounded = sdRoundBox(uv, vec2(0.32, 0.11), vec4(0.09));
           rounded = smoothstep(0.06, 0.0, rounded);
 
           if (rounded < 0.01) {
@@ -314,10 +315,10 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
       const uColor3Loc = gl.getUniformLocation(program, 'uColor3');
       const uAlphaLoc = gl.getUniformLocation(program, 'uAlpha');
 
-      // Generate Grid & Poisson-style Particle Coordinates
-      // Spans slightly past edges (-1.2 to 1.2) for continuous coverage
-      const gridCols = Math.round(72 * Math.sqrt(densityScale));
-      const gridRows = Math.round(44 * Math.sqrt(densityScale));
+      // Generate Grid & Poisson-style Particle Coordinates with Airy Antigravity Spacing
+      // Antigravity particles have ample breathing room so each pill floats cleanly without crowding
+      const gridCols = Math.round(42 * Math.sqrt(densityScale));
+      const gridRows = Math.round(24 * Math.sqrt(densityScale));
       const particleCount = gridCols * gridRows;
 
       const positions = new Float32Array(particleCount * 2);
@@ -328,12 +329,13 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
 
       for (let r = 0; r < gridRows; r++) {
         for (let c = 0; c < gridCols; c++) {
-          // Add hexagonal offset and subtle organic jitter
-          const xNorm = ((c + (r % 2 === 0 ? 0.5 : 0)) / gridCols) * 2.5 - 1.25;
-          const yNorm = (r / gridRows) * 2.5 - 1.25;
+          // Hexagonal alternating row offset for organic, non-rigid distribution
+          const xNorm = ((c + (r % 2 === 0 ? 0.5 : 0)) / gridCols) * 2.6 - 1.3;
+          const yNorm = (r / gridRows) * 2.6 - 1.3;
 
-          const jitterX = (Math.random() - 0.5) * (1.8 / gridCols);
-          const jitterY = (Math.random() - 0.5) * (1.8 / gridRows);
+          // Controlled subtle jitter to preserve distinct space between particles
+          const jitterX = (Math.random() - 0.5) * (0.6 / gridCols);
+          const jitterY = (Math.random() - 0.5) * (0.6 / gridRows);
 
           positions[pIdx++] = xNorm + jitterX;
           positions[pIdx++] = yNorm + jitterY;
