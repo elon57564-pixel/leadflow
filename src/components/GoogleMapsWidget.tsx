@@ -8,13 +8,22 @@ interface Props {
   className?: string;
 }
 
+// In-memory frontend cache for geocoded location widgets
+const widgetMapsCache = new Map<string, any>();
+
 export const GoogleMapsWidget: React.FC<Props> = ({ locationName, initialAddress, className = '' }) => {
   const { currentTenant, authToken, showToast } = useApp();
   const [loading, setLoading] = useState(false);
-  const [mapsData, setMapsData] = useState<any>(null);
+  const cacheKey = `${locationName || ''}_${initialAddress || ''}`.toLowerCase().trim();
+  const [mapsData, setMapsData] = useState<any>(() => widgetMapsCache.get(cacheKey) || null);
 
-  const fetchMapsVerification = async () => {
+  const fetchMapsVerification = async (force: boolean = false) => {
     if (!locationName) return;
+    if (!force && widgetMapsCache.has(cacheKey)) {
+      setMapsData(widgetMapsCache.get(cacheKey));
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/ai/maps-verify', {
@@ -31,6 +40,7 @@ export const GoogleMapsWidget: React.FC<Props> = ({ locationName, initialAddress
       });
       const json = await res.json();
       if (json.success && json.data) {
+        widgetMapsCache.set(cacheKey, json.data);
         setMapsData(json.data);
       }
     } catch {
@@ -67,7 +77,7 @@ export const GoogleMapsWidget: React.FC<Props> = ({ locationName, initialAddress
         </div>
 
         <button
-          onClick={fetchMapsVerification}
+          onClick={() => fetchMapsVerification(true)}
           disabled={loading}
           className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
           title="Re-verify location"
