@@ -5,6 +5,7 @@ import { TopHeader } from './components/TopHeader';
 import { ProjectsPipeline } from './components/ProjectsPipeline';
 import { SOPGuideView } from './components/SOPGuideView';
 import { OutreachView } from './components/OutreachView';
+import { OutreachSuiteView } from './components/outreach-suite/OutreachSuiteView';
 import { UnifiedInboxView } from './components/UnifiedInboxView';
 import { DashboardAnalytics } from './components/DashboardAnalytics';
 import { IntegrationsView } from './components/IntegrationsView';
@@ -176,6 +177,12 @@ const AppContent: React.FC = () => {
         return (
           <RoleRouteGuard allowedRoles={['admin', 'bd_head', 'sales']} moduleName="Outreach Engine & Scrapers">
             <OutreachView />
+          </RoleRouteGuard>
+        );
+      case 'outreach_suite':
+        return (
+          <RoleRouteGuard allowedRoles={['admin', 'ceo', 'bd_head', 'sales', 'coordinator', 'project_manager', 'developer']} moduleName="LeadFlow Outreach Suite">
+            <OutreachSuiteView />
           </RoleRouteGuard>
         );
       case 'analytics':

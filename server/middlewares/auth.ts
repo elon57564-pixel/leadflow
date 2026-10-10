@@ -1,8 +1,22 @@
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
-import { getDB, saveDB, hashPassword, DEFAULT_USERS, logAuditAction, verifyApiToken } from '../db';
+import { getDB, saveDB, hashPassword, verifyPassword, DEFAULT_USERS, logAuditAction, verifyApiToken } from '../db';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'agency_ops_jwt_secret_key_production_2026_alm_nexus';
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (secret && secret.trim().length > 0) {
+    return secret.trim();
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('FATAL: JWT_SECRET environment variable is missing in production. App cannot start securely.');
+  }
+  // In development / non-production, generate a random secret per process and log warning
+  const generated = crypto.randomBytes(32).toString('hex');
+  console.warn('⚠️ [Auth Security Warning] JWT_SECRET is not set. Generated a random secret for this process session.');
+  return generated;
+}
+
+const JWT_SECRET = getJwtSecret();
 
 export interface TokenPayload {
   id: string;
@@ -210,9 +224,9 @@ export function authenticateUser(identifier: string, passwordPlain: string, ipAd
     return { success: false, message: 'Invalid credentials or role.' };
   }
 
-  const hash = hashPassword(passwordPlain);
+  const verification = verifyPassword(passwordPlain, user.passwordHash);
   const isPinMatch = passwordPlain === '1234' || passwordPlain === '0000';
-  const isPasswordMatch = user.passwordHash === hash;
+  const isPasswordMatch = verification.valid;
 
   if (!isPasswordMatch && !isPinMatch) {
     logAuditAction({
@@ -226,6 +240,21 @@ export function authenticateUser(identifier: string, passwordPlain: string, ipAd
       ipAddress: ipAddress || '127.0.0.1'
     });
     return { success: false, message: 'Incorrect password or PIN code.' };
+  }
+
+  // Transparently upgrade legacy HMAC hashes to modern scrypt on successful login
+  if (isPasswordMatch && verification.needsUpgrade) {
+    try {
+      const db = getDB();
+      const dbUser = db.users?.find((u: any) => u.id === user.id);
+      if (dbUser) {
+        dbUser.passwordHash = hashPassword(passwordPlain);
+        user.passwordHash = dbUser.passwordHash;
+        saveDB(db);
+      }
+    } catch {
+      // Non-fatal, login still succeeds
+    }
   }
 
   const tenantId = user.tenantId || user.tenant_id || 'tenant-alm-nexus';

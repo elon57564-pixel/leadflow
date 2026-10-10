@@ -61,6 +61,14 @@ import { emailRouter } from './server/services/emailEngine';
 import { gtmToolsRouter } from './server/routes/gtmToolsRoutes';
 import { checkoutRouter } from './server/routes/checkoutRoutes';
 
+// Outreach Suite Module
+import { outreachSystemRouter } from './server/routes/outreach/systemRoutes';
+import { mailboxesRouter } from './server/routes/outreach/mailboxes';
+import { campaignsRouter } from './server/routes/outreach/campaigns';
+import { ensureOutreachSchema, getOutreachPool } from './server/services/outreach/schema';
+import { startQueueWorker, stopQueueWorker } from './server/services/outreach/queue';
+import { initSequencer } from './server/services/outreach/sequencer';
+
 dotenv.config();
 
 // Global crash resilience for production deployments
@@ -201,6 +209,11 @@ app.use('/api/audit-logs', auditLogsRouter);
 app.use('/api/agency', agencyRouter);
 app.use('/api', generalRouter);
 
+// LeadFlow Outreach Suite Module (Mounted under /api/outreach)
+app.use('/api/outreach/system', outreachSystemRouter);
+app.use('/api/outreach', mailboxesRouter);
+app.use('/api/outreach', campaignsRouter);
+
 // Export shared database functions for any legacy external bindings
 export { readDB, writeDB, INITIAL_DB };
 
@@ -213,6 +226,27 @@ async function startServer() {
     await initPostgresPool();
   } catch (err: any) {
     console.warn(`[Database Engine] Initial pool setup warning: ${err.message}. Continuing with local fallback.`);
+  }
+
+  // Initialize Outreach Suite schema & background queue worker when PostgreSQL is available
+  try {
+    const outreachPool = getOutreachPool();
+    if (outreachPool) {
+      await ensureOutreachSchema(outreachPool);
+      if (process.env.OUTREACH_WORKER !== 'off') {
+        startQueueWorker(outreachPool);
+        initSequencer(outreachPool);
+      }
+    } else {
+      logger.info('Outreach Suite: PostgreSQL not configured. Operating in PostgreSQL-required mode.', {
+        context: 'OutreachInit'
+      });
+    }
+  } catch (outreachErr: any) {
+    logger.error('Failed to initialize Outreach Suite schema or worker', {
+      context: 'OutreachInit',
+      details: outreachErr?.message
+    });
   }
 
   const server = http.createServer(app);
@@ -285,6 +319,7 @@ async function startServer() {
   // Graceful Shutdown Handlers for Railway, Render & Container Lifecycles
   const handleShutdown = (signal: string) => {
     logger.info(`Received ${signal}. Initiating graceful shutdown...`, { context: 'GracefulShutdown' });
+    stopQueueWorker();
     httpServer.close(() => {
       logger.info('HTTP server closed. Exiting process cleanly.', { context: 'GracefulShutdown' });
       process.exit(0);

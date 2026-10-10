@@ -30,7 +30,8 @@ service cloud.firestore {
     // Projects pipeline & leads
     match /projects/{projectId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
     }
 
     // User preferences and state

@@ -4,6 +4,9 @@ import { readDB, writeDB } from '../db';
 import { AuditLogService } from './auditLogService';
 import { realtimeEngine } from './realtimeEngine';
 
+// Default Gemini model read from process.env.GEMINI_MODEL with fallback
+export const DEFAULT_GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+
 // Shared Server-Side Gemini Initialization
 export function getGeminiClient(): GoogleGenAI | null {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY;
@@ -63,7 +66,7 @@ Provide a structured intelligence summary including:
 Return a clear JSON object with fields: summary, techStack (array of strings), recentNews (array of strings), fundingStatus, valueHook.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: DEFAULT_GEMINI_MODEL,
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }]
@@ -202,7 +205,7 @@ Provide verified details including:
 Return a structured response.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: DEFAULT_GEMINI_MODEL,
       contents: prompt,
       config: {
         tools: [{ googleMaps: {} }]
@@ -534,7 +537,7 @@ Provide concise, highly professional, consultative responses. Respect tenant pri
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: DEFAULT_GEMINI_MODEL,
       contents: params.message,
       config: {
         systemInstruction,

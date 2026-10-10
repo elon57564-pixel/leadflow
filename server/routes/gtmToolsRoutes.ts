@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
+import net from 'node:net';
 import dns from 'node:dns/promises';
-import { getGeminiClient } from '../services/geminiService';
+import { getGeminiClient, DEFAULT_GEMINI_MODEL } from '../services/geminiService';
 import { logger } from '../logger';
 
 export const gtmToolsRouter = Router();
@@ -14,8 +15,101 @@ function withTimeout<T>(promise: Promise<T>, ms: number = 8000): Promise<T> {
 }
 
 /**
- * Helper utility to scrape target domain homepage for public email addresses,
- * phone numbers, and meta tags.
+ * Checks if an IP address belongs to private, loopback, link-local, CGNAT, or reserved ranges
+ */
+export function isPrivateOrReservedIP(ip: string): boolean {
+  if (net.isIPv4(ip)) {
+    const parts = ip.split('.').map(Number);
+    if (parts.length !== 4 || parts.some(p => isNaN(p) || p < 0 || p > 255)) {
+      return true;
+    }
+    const [p0, p1] = parts;
+    if (p0 === 0) return true; // 0.0.0.0/8 (Current network)
+    if (p0 === 10) return true; // 10.0.0.0/8 (Private)
+    if (p0 === 127) return true; // 127.0.0.0/8 (Loopback)
+    if (p0 === 169 && p1 === 254) return true; // 169.254.0.0/16 (Link-local)
+    if (p0 === 172 && p1 >= 16 && p1 <= 31) return true; // 172.16.0.0/12 (Private)
+    if (p0 === 192 && p1 === 168) return true; // 192.168.0.0/16 (Private)
+    if (p0 === 100 && p1 >= 64 && p1 <= 127) return true; // 100.64.0.0/10 (CGNAT)
+    if (p0 === 192 && p1 === 0) return true; // 192.0.0.0/24 (IETF Protocol)
+    if (p0 === 198 && (p1 === 18 || p1 === 19)) return true; // 198.18.0.0/15 (Benchmarking)
+    if (p0 >= 224) return true; // Multicast (224-239) & Reserved (240+)
+    return false;
+  }
+
+  if (net.isIPv6(ip)) {
+    const normalized = ip.toLowerCase();
+    if (normalized === '::1' || normalized === '0:0:0:0:0:0:0:1') return true;
+    if (normalized === '::' || normalized === '0:0:0:0:0:0:0:0') return true;
+    if (normalized.startsWith('::ffff:')) {
+      const v4 = normalized.slice(7);
+      return isPrivateOrReservedIP(v4);
+    }
+    // fe80::/10 (Link-local)
+    if (/^fe[89ab]/i.test(normalized)) return true;
+    // fc00::/7 (Unique local / ULA)
+    if (/^f[cd]/i.test(normalized)) return true;
+    // 100::/64 (Discard prefix) or 2001:db8::/32 (Documentation)
+    if (normalized.startsWith('100:') || normalized.startsWith('2001:db8:')) return true;
+    // ff00::/8 (Multicast)
+    if (normalized.startsWith('ff')) return true;
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Validates a user-supplied URL/domain against SSRF attacks:
+ * 1. Checks protocol is strictly http or https
+ * 2. Checks port is strictly 80 or 443
+ * 3. Resolves DNS and rejects private, loopback, link-local, and CGNAT IP addresses
+ */
+export async function validateSafeUrlForSSRF(rawUrl: string): Promise<{ safe: boolean; error?: string }> {
+  try {
+    const urlObj = new URL(rawUrl);
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return { safe: false, error: `Protocol ${urlObj.protocol} not permitted (only http: and https:)` };
+    }
+
+    const port = urlObj.port ? parseInt(urlObj.port, 10) : (urlObj.protocol === 'https:' ? 443 : 80);
+    if (port !== 80 && port !== 443) {
+      return { safe: false, error: `Port ${port} not permitted (only ports 80 and 443)` };
+    }
+
+    const hostname = urlObj.hostname;
+    if (!hostname || hostname === 'localhost') {
+      return { safe: false, error: 'Disallowed hostname' };
+    }
+
+    if (net.isIP(hostname)) {
+      if (isPrivateOrReservedIP(hostname)) {
+        return { safe: false, error: `Direct IP ${hostname} is private or reserved` };
+      }
+      return { safe: true };
+    }
+
+    // Resolve DNS (IPv4 and IPv6)
+    const records = await dns.lookup(hostname, { all: true });
+    if (!records || records.length === 0) {
+      return { safe: false, error: 'DNS lookup yielded no records' };
+    }
+
+    for (const record of records) {
+      if (isPrivateOrReservedIP(record.address)) {
+        return { safe: false, error: `Resolved IP ${record.address} is private or reserved` };
+      }
+    }
+
+    return { safe: true };
+  } catch (err: any) {
+    return { safe: false, error: err.message };
+  }
+}
+
+/**
+ * Helper utility to scrape target domain homepage for public contact info
+ * with strict SSRF protection, 3-second timeout, and 1MB response cap.
  */
 async function scrapeDomainContactInfo(domain: string): Promise<{
   scrapedEmails: string[];
@@ -26,79 +120,116 @@ async function scrapeDomainContactInfo(domain: string): Promise<{
   const scrapedPhones: string[] = [];
   let detectedPattern: string | undefined = undefined;
 
-  const urlsToTry = [`https://${domain}`, `http://${domain}`];
+  const cleanDomain = domain.trim().toLowerCase().replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+  const urlsToTry = [`https://${cleanDomain}`, `http://${cleanDomain}`];
 
   for (const targetUrl of urlsToTry) {
     try {
-      const response = await withTimeout(
-        fetch(targetUrl, {
+      // 1. SSRF check before network request
+      const ssrfCheck = await validateSafeUrlForSSRF(targetUrl);
+      if (!ssrfCheck.safe) {
+        logger.warn('Blocked potential SSRF scrape request', { details: { targetUrl, reason: ssrfCheck.error } });
+        continue;
+      }
+
+      // 2. Strict 3s timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+      try {
+        const response = await fetch(targetUrl, {
+          signal: controller.signal,
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
           }
-        }),
-        3200
-      );
+        });
+        clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const html = await response.text();
+        if (response.ok) {
+          // 3. 1MB response cap stream reading
+          const maxBytes = 1024 * 1024; // 1MB
+          const reader = response.body?.getReader();
+          const chunks: Uint8Array[] = [];
+          let totalBytes = 0;
 
-        // 1. Scrape mailto: and raw emails matching domain
-        const mailtoMatches = html.match(/mailto:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi);
-        if (mailtoMatches) {
-          mailtoMatches.forEach(m => {
-            const clean = m.replace(/^mailto:/i, '').trim().toLowerCase();
-            if (!scrapedEmails.includes(clean) && !clean.endsWith('.png') && !clean.endsWith('.svg')) {
-              scrapedEmails.push(clean);
+          if (reader) {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              if (value) {
+                totalBytes += value.length;
+                if (totalBytes > maxBytes) {
+                  const allowed = maxBytes - (totalBytes - value.length);
+                  if (allowed > 0) chunks.push(value.subarray(0, allowed));
+                  reader.cancel().catch(() => {});
+                  break;
+                }
+                chunks.push(value);
+              }
             }
-          });
-        }
-
-        const rawEmailRegex = new RegExp(`[a-zA-Z0-9._%+-]+@${domain.replace(/\./g, '\\.')}`, 'gi');
-        const rawMatches = html.match(rawEmailRegex);
-        if (rawMatches) {
-          rawMatches.forEach(em => {
-            const clean = em.trim().toLowerCase();
-            if (!scrapedEmails.includes(clean) && !clean.endsWith('.png') && !clean.endsWith('.svg')) {
-              scrapedEmails.push(clean);
-            }
-          });
-        }
-
-        // 2. Scrape phone numbers
-        const telMatches = html.match(/href=["']tel:([^"']+)["']/gi);
-        if (telMatches) {
-          telMatches.forEach(t => {
-            const phoneStr = t.replace(/href=["']tel:/i, '').replace(/["']/g, '').trim();
-            if (phoneStr && !scrapedPhones.includes(phoneStr)) {
-              scrapedPhones.push(phoneStr);
-            }
-          });
-        }
-
-        const phoneRegex = /(?:\+?1[-.\s]?)?\(?[2-9]\d{2}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
-        const phoneRawMatches = html.match(phoneRegex);
-        if (phoneRawMatches) {
-          phoneRawMatches.slice(0, 3).forEach(p => {
-            const clean = p.trim();
-            if (clean && !scrapedPhones.includes(clean)) {
-              scrapedPhones.push(clean);
-            }
-          });
-        }
-
-        // 3. Extract pattern if personal email found
-        const personalEmail = scrapedEmails.find(e => !e.startsWith('info@') && !e.startsWith('sales@') && !e.startsWith('contact@') && !e.startsWith('support@'));
-        if (personalEmail) {
-          const prefix = personalEmail.split('@')[0];
-          if (prefix.includes('.')) {
-            detectedPattern = `{first}.{last}@${domain}`;
-          } else if (prefix.length === 1) {
-            detectedPattern = `{first}@${domain}`;
           }
-        }
+          const html = Buffer.concat(chunks).toString('utf-8');
 
-        break; // Successfully fetched & parsed
+          // 1. Scrape mailto: and raw emails matching domain
+          const mailtoMatches = html.match(/mailto:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi);
+          if (mailtoMatches) {
+            mailtoMatches.forEach(m => {
+              const clean = m.replace(/^mailto:/i, '').trim().toLowerCase();
+              if (!scrapedEmails.includes(clean) && !clean.endsWith('.png') && !clean.endsWith('.svg')) {
+                scrapedEmails.push(clean);
+              }
+            });
+          }
+
+          const rawEmailRegex = new RegExp(`[a-zA-Z0-9._%+-]+@${cleanDomain.replace(/\./g, '\\.')}`, 'gi');
+          const rawMatches = html.match(rawEmailRegex);
+          if (rawMatches) {
+            rawMatches.forEach(em => {
+              const clean = em.trim().toLowerCase();
+              if (!scrapedEmails.includes(clean) && !clean.endsWith('.png') && !clean.endsWith('.svg')) {
+                scrapedEmails.push(clean);
+              }
+            });
+          }
+
+          // 2. Scrape phone numbers
+          const telMatches = html.match(/href=["']tel:([^"']+)["']/gi);
+          if (telMatches) {
+            telMatches.forEach(t => {
+              const phoneStr = t.replace(/href=["']tel:/i, '').replace(/["']/g, '').trim();
+              if (phoneStr && !scrapedPhones.includes(phoneStr)) {
+                scrapedPhones.push(phoneStr);
+              }
+            });
+          }
+
+          const phoneRegex = /(?:\+?1[-.\s]?)?\(?[2-9]\d{2}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
+          const phoneRawMatches = html.match(phoneRegex);
+          if (phoneRawMatches) {
+            phoneRawMatches.slice(0, 3).forEach(p => {
+              const clean = p.trim();
+              if (clean && !scrapedPhones.includes(clean)) {
+                scrapedPhones.push(clean);
+              }
+            });
+          }
+
+          // 3. Extract pattern if personal email found
+          const personalEmail = scrapedEmails.find(e => !e.startsWith('info@') && !e.startsWith('sales@') && !e.startsWith('contact@') && !e.startsWith('support@'));
+          if (personalEmail) {
+            const prefix = personalEmail.split('@')[0];
+            if (prefix.includes('.')) {
+              detectedPattern = `{first}.{last}@${cleanDomain}`;
+            } else if (prefix.length === 1) {
+              detectedPattern = `{first}@${cleanDomain}`;
+            }
+          }
+
+          break; // Successfully fetched & parsed
+        }
+      } catch {
+        clearTimeout(timeoutId);
       }
     } catch {
       // Continue to next URL attempt
@@ -199,7 +330,7 @@ Return STRICT JSON:
 
         const gResponse = await withTimeout(
           gemini.models.generateContent({
-            model: 'gemini-3.8-flash',
+            model: DEFAULT_GEMINI_MODEL,
             contents: prompt,
             config: {
               tools: [{ googleSearch: {} }]
@@ -370,7 +501,7 @@ Return a JSON object:
 }`;
           const gResponse = await withTimeout(
             gemini.models.generateContent({
-              model: 'gemini-3.8-flash',
+              model: DEFAULT_GEMINI_MODEL,
               contents: prompt
             }),
             7500
@@ -531,7 +662,7 @@ Return only JSON.`;
           const prompt = `Generate 3 short, personalized, conversational LinkedIn connection hooks for target persona "${persona}" and angle "${angle}". Under 45 words each. Return JSON: { "hooks": ["...", "...", "..."] }`;
           const gResponse = await withTimeout(
             gemini.models.generateContent({
-              model: 'gemini-3.8-flash',
+              model: DEFAULT_GEMINI_MODEL,
               contents: prompt
             }),
             7000
@@ -615,7 +746,7 @@ Return STRICT JSON:
 
         const gResponse = await withTimeout(
           gemini.models.generateContent({
-            model: 'gemini-3.8-flash',
+            model: DEFAULT_GEMINI_MODEL,
             contents: prompt,
             config: {
               tools: [{ googleSearch: {} }]

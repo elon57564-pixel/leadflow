@@ -6,7 +6,8 @@ import {
   verifyLocationWithGoogleMaps,
   generateCreativeImage,
   transcribeAndProcessVoiceNote,
-  processContextAwareChatbotMessage
+  processContextAwareChatbotMessage,
+  DEFAULT_GEMINI_MODEL
 } from '../services/geminiService';
 
 export const aiRouter = Router();
@@ -151,12 +152,12 @@ Always generate output tailored to the user's prompt without fluff.`;
   if (ai) {
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
+        model: DEFAULT_GEMINI_MODEL,
         contents: `${systemInstructions}\n\nTask Mode: ${mode || 'custom_pitch'}\nClient Name: ${clientName || 'Client'}\nWebsite Type: ${websiteType || 'General'}\nChannel: ${channel || 'Upwork/LinkedIn'}\nUser Prompt: ${prompt}`
       });
 
       const text = response.text || '';
-      return res.json({ success: true, text, model: 'gemini-3.8-flash' });
+      return res.json({ success: true, text, model: DEFAULT_GEMINI_MODEL });
     } catch (err: any) {
       console.warn('Gemini API call error, falling back to smart SOP generator:', err.message);
     }
@@ -244,7 +245,7 @@ aiRouter.post('/test-cloud', async (req: Request, res: Response) => {
     }
     try {
       await ai.models.generateContent({
-        model: model || 'gemini-3.8-flash',
+        model: model || DEFAULT_GEMINI_MODEL,
         contents: 'Ping test. Reply with: OK'
       });
       return res.json({ ok: true, message: `Gemini API key is active and responding.` });
@@ -344,7 +345,7 @@ aiRouter.post('/universal-generate', async (req: Request, res: Response) => {
       if (ai) {
         try {
           const response = await ai.models.generateContent({
-            model: cloudModel || 'gemini-3.8-flash',
+            model: cloudModel || DEFAULT_GEMINI_MODEL,
             contents: `${systemInstructions}\n\nTask:\n${userPrompt}`
           });
           const text = response.text || '';
@@ -359,7 +360,7 @@ aiRouter.post('/universal-generate', async (req: Request, res: Response) => {
                 text: parsed.suggestedBody || parsed.introductoryMessage || text,
                 result: parsed.suggestedBody || parsed.introductoryMessage || text,
                 providerUsed: 'cloud',
-                modelUsed: cloudModel || 'gemini-3.8-flash',
+                modelUsed: cloudModel || DEFAULT_GEMINI_MODEL,
                 sentiment: parsed.sentiment,
                 sentimentScore: parsed.sentimentScore,
                 detectedIntent: parsed.detectedIntent,
@@ -378,7 +379,7 @@ aiRouter.post('/universal-generate', async (req: Request, res: Response) => {
             text,
             result: text,
             providerUsed: 'cloud',
-            modelUsed: cloudModel || 'gemini-3.8-flash'
+            modelUsed: cloudModel || DEFAULT_GEMINI_MODEL
           });
         } catch (err: any) {
           console.warn('Gemini cloud call failed:', err.message);
@@ -490,7 +491,7 @@ aiRouter.post('/outreach', async (req: Request, res: Response) => {
   if (ai) {
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
+        model: DEFAULT_GEMINI_MODEL,
         contents: `${systemPrompt}\n\nTarget Prospect:\n- Name: ${cName}\n- Company: ${compName}\n- Industry: ${industry || 'Technology / Business'}\n- Project Focus: ${wType}\n- Client Need: ${need}\n- Value Hook: ${valueHook || 'Rapid 10-day staging delivery, mobile responsive, dedicated QA'}\n- Channel Format: ${channel || 'linkedin_connect'}\n- Tone: ${tone || 'consultative'}\n\nGenerate the JSON response matching the schema now.`
       });
 
@@ -509,7 +510,7 @@ aiRouter.post('/outreach', async (req: Request, res: Response) => {
           introductoryMessage: parsed.introductoryMessage || raw,
           followUpNudge: parsed.followUpNudge || `Hi ${cName}, following up on my previous note. We have a free staging sprint slot open this week if you'd like a quick preview of your ${wType} concept!`,
           recommendedSubject: parsed.recommendedSubject || `Quick question regarding ${compName}'s ${wType} build`,
-          modelUsed: 'gemini-3.8-flash'
+          modelUsed: DEFAULT_GEMINI_MODEL
         });
       }
     } catch (err: any) {
@@ -717,7 +718,7 @@ Respond in JSON format with:
   if (ai) {
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
+        model: DEFAULT_GEMINI_MODEL,
         contents: prompt
       });
       const text = response.text || '';
@@ -739,7 +740,7 @@ Respond in JSON format with:
           sentimentScore: msg.sentimentScore,
           detectedIntent: parsed.detectedIntent,
           aiSuggestedReply: msg.aiSuggestedReply,
-          modelUsed: 'gemini-3.8-flash'
+          modelUsed: DEFAULT_GEMINI_MODEL
         });
       }
     } catch (e) {

@@ -60,9 +60,49 @@ let isPgConnected = false;
 let lastPgPingMs = 0;
 let lastBackupTimestamp = new Date().toISOString();
 
-// Helper to hash passwords with salt
-export function hashPassword(password: string, salt: string = 'agency_salt_2026'): string {
-  return crypto.createHmac('sha256', salt).update(password).digest('hex');
+// Modern password hashing using Node crypto scrypt with a random 16-byte salt per user
+// Format: scrypt$<saltHex>$<hashHex>
+export function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const derivedKey = crypto.scryptSync(password, salt, 64);
+  return `scrypt$${salt}$${derivedKey.toString('hex')}`;
+}
+
+// Verify password supporting both modern scrypt format and legacy HMAC-SHA256
+export function verifyPassword(passwordPlain: string, storedHash: string): { valid: boolean; needsUpgrade: boolean } {
+  if (!storedHash || typeof storedHash !== 'string') {
+    return { valid: false, needsUpgrade: false };
+  }
+
+  // Modern scrypt format
+  if (storedHash.startsWith('scrypt$')) {
+    const parts = storedHash.split('$');
+    if (parts.length === 3) {
+      const salt = parts[1];
+      const expectedHash = parts[2];
+      try {
+        const derivedKey = crypto.scryptSync(passwordPlain, salt, 64);
+        const derivedHex = derivedKey.toString('hex');
+        const bufA = Buffer.from(derivedHex, 'hex');
+        const bufB = Buffer.from(expectedHash, 'hex');
+        if (bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB)) {
+          return { valid: true, needsUpgrade: false };
+        }
+      } catch {
+        return { valid: false, needsUpgrade: false };
+      }
+    }
+    return { valid: false, needsUpgrade: false };
+  }
+
+  // Legacy HMAC-SHA256 format ('agency_salt_2026')
+  const legacyHash = crypto.createHmac('sha256', 'agency_salt_2026').update(passwordPlain).digest('hex');
+  const isMatch = legacyHash === storedHash;
+  return { valid: isMatch, needsUpgrade: isMatch };
+}
+
+export function getPgPool(): pg.Pool | null {
+  return pgPool;
 }
 
 // Initial seed data adhering to all 11 SOP sections
